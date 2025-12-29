@@ -1,0 +1,127 @@
+{
+  "HomePage": {
+    "header": {
+      "title": "Business Assistant",
+      "login": "Log in",
+      "register": "Register"
+    },
+    "hero": {
+      "title_part1": "Manage your ",
+      "title_part2": "business smarter",
+      "subtitle": "A comprehensive solution for process automation, team management, and financial analytics in one place.",
+      "startBtn": "Get Started",
+      "learnMoreBtn": "Learn More",
+      "badgeFree": "Totally free",
+      "badgeNoCard": "No credit card required"
+    },
+    "features": {
+      "analytics": {
+        "title": "Powerful Analytics",
+        "description": "Get insights about your business in real-time. Our algorithms analyze thousands of parameters so you can make the right decisions instantly.",
+        "items": {
+          "0": "Real-time sales and profit reports",
+          "1": "AI-based cash flow forecasting",
+          "2": "Data export to PDF, Excel, and CSV"
+        }
+      },
+      "team": {
+        "title": "Team Management",
+        "description": "Create the perfect environment for your employees. Track efficiency, manage salaries and schedules in one click.",
+        "items": {
+          "0": "Convenient time tracking system",
+          "1": "Automatic payroll and bonus calculation",
+          "2": "Task assignment and performance control (KPI)"
+        }
+      },
+      "security": {
+        "title": "Bank-level Security",
+        "description": "Your data is protected by state-of-the-art encryption methods. We care about your business confidentiality 24/7.",
+        "items": {
+          "0": "End-to-end data encryption (AES-256)",
+          "1": "Daily automatic backup",
+          "2": "Two-factor authentication for all accounts"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to transform your business?",
+      "description": "Join thousands of companies that have already optimized their processes with Business Assistant. Start for free today.",
+      "button": "Create Account",
+      "caption": "Totally free • No credit card required"
+    },
+    "footer": {
+      "description": "Modern platform for automating your business. Make management simple and effective today.",
+      "columns": {
+        "product": {
+          "title": "Product",
+          "links": {
+            "features": "Features",
+            "pricing": "Pricing",
+            "integrations": "Integrations",
+            "updates": "Updates"
+          }
+        },
+        "company": {
+          "title": "Company",
+          "links": {
+            "about": "About Us",
+            "careers": "Careers",
+            "blog": "Blog",
+            "contacts": "Contact"
+          }
+        },
+        "subscribe": {
+          "title": "Subscribe to news",
+          "placeholder": "Your email",
+          "button": "OK"
+        }
+      },
+      "copyright": "Business Assistant. All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use"
+    }
+  },
+  "Auth": {
+    "backToHome": "Back to Home",
+    "Login": {
+      "title": "System Login",
+      "emailLabel": "Email or Phone",
+      "passwordLabel": "Password",
+      "submitButton": "Log In",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Create Company",
+      "errors": {
+        "required": "This field is required",
+        "passwordRequired": "Enter password",
+        "invalidCredentials": "Invalid login or password",
+        "defaultError": "Login failed"
+      }
+    },
+    "Register": {
+      "title": "Company Registration",
+      "companyName": "Company Name",
+      "fullName": "Owner's Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "password": "Password",
+      "confirmPassword": "Repeat Password",
+      "submitButton": "Register Company",
+      "submitting": "Registering...",
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Log In",
+      "errors": {
+        "required": "Required field",
+        "minLength": "Minimum 6 characters",
+        "passwordsMismatch": "Passwords do not match",
+        "defaultError": "Registration failed"
+      }
+    }
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "employees": "Employees",
+    "chat": "AI Assistant",
+    "profile": "Profile",
+    "logout": "Log Out"
+  }
+}
