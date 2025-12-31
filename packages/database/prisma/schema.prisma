@@ -7,20 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  OWNER
-  ADMIN
-  EMPLOYEE
-}
-
-model Company {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  users     User[]
-}
-
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -31,6 +17,87 @@ model User {
   role      UserRole @default(EMPLOYEE)
   companyId String
   company   Company  @relation(fields: [companyId], references: [id])
+  chats     Chat[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  role      String
+  createdAt DateTime @default(now())
+
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id         String @id @default(uuid())
+  name       String
+  inviteCode String @unique
+
+  balance Float @default(0)
+
+  revenueFrequency RevenueFrequency @default(MONTHLY)
+  taxGroup         TaxGroup         @default(FOP_3_5PERCENT)
+  rentAmount       Float            @default(0)
+  utilitiesAmount  Float            @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  amount      Float
+  type        TransactionType
+  category    String
+  description String?
+  date        DateTime        @default(now())
+  isArchived  Boolean         @default(false)
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  EMPLOYEE
+}
+
+enum RevenueFrequency {
+  DAILY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum TaxGroup {
+  FOP_1
+  FOP_2
+  FOP_3_3PERCENT
+  FOP_3_5PERCENT
+  GENERAL
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
 }

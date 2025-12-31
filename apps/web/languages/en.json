@@ -123,5 +123,97 @@
     "chat": "AI Assistant",
     "profile": "Profile",
     "logout": "Log Out"
+  },
+  "Chat": {
+    "title": "AI Assistant",
+    "subtitle": "Your smart business companion",
+    "placeholder": "Type your question...",
+    "send": "Send",
+    "welcomeTitle": "How can I help you?",
+    "welcomeSubtitle": "I can analyze finances, suggest marketing ideas, or help with team management.",
+    "suggestions": {
+      "marketing": "Marketing ideas",
+      "analysis": "Profit analysis",
+      "employees": "Team motivation"
+    },
+    "checkImportantInformation": "Business Assistant AI can make mistakes. Check important information."
+  },
+  "Profile": {
+    "title": "Profile Settings",
+    "subtitle": "Manage your personal information and security",
+    "personalInfo": "Personal Information",
+    "security": "Security",
+    "company": "Company",
+    "notSpecified": "Not Specified",
+    "successMessage": "Profile successfully updated",
+    "fields": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "jobTitle": "Job Title",
+      "jobTitlePlaceholder": "Example: Senior Java Developer",
+      "password": "New Password",
+      "passwordHint": "Leave this field blank if you don't want to change your password."
+    },
+    "buttons": {
+      "save": "Save Changes",
+      "saving": "Saving..."
+    }
+  },
+  "Dashboard": {
+    "title": "Financial Dashboard",
+    "balance": "Balance",
+    "companyCode": "Code",
+    "tabs": {
+      "transactions": "Transactions",
+      "archive": "Archive",
+      "settings": "Settings"
+    },
+    "inputs": {
+      "amount": "Amount",
+      "category": "Category",
+      "description": "Description",
+      "typeIncome": "Income",
+      "typeExpense": "Expense"
+    },
+    "buttons": {
+      "add": "Add",
+      "autoPayments": "Auto-payments",
+      "toArchive": "To Archive",
+      "saveSettings": "Save Settings"
+    },
+    "table": {
+      "date": "Date",
+      "type": "Type",
+      "category": "Category",
+      "amount": "Amount",
+      "description": "Description",
+      "empty": "No transactions",
+      "selected": "selected"
+    },
+    "settings": {
+      "taxInfo": "Tax Information",
+      "autoPaymentsTitle": "Automatic Payments",
+      "taxType": "Taxation Type",
+      "revenueFrequency": "Revenue Frequency",
+      "rentLabel": "Rent Cost (month)",
+      "utilitiesLabel": "Utilities (estimated)"
+    },
+    "alerts": {
+      "loadError": "Failed to load company settings. Please re-login.",
+      "autoPaymentsInfo": "These amounts will be used when clicking the \"Auto-payments\" button in the transactions tab.",
+      "saved": "Settings saved"
+    },
+    "enums": {
+      "FOP_1": "FOP Group 1",
+      "FOP_2": "FOP Group 2",
+      "FOP_3_5PERCENT": "FOP Group 3 (5%)",
+      "FOP_3_3PERCENT": "FOP Group 3 (3% + VAT)",
+      "GENERAL": "General System",
+      "DAILY": "Daily",
+      "MONTHLY": "Monthly",
+      "QUARTERLY": "Quarterly",
+      "YEARLY": "Yearly"
+    }
   }
 }

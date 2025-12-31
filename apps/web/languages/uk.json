@@ -123,5 +123,97 @@
     "chat": "AI Асистент",
     "profile": "Профіль",
     "logout": "Вийти"
+  },
+  "Chat": {
+    "title": "AI Асистент",
+    "subtitle": "Ваш розумний помічник у бізнесі",
+    "placeholder": "Напишіть ваше запитання...",
+    "send": "Надіслати",
+    "welcomeTitle": "Чим можу допомогти?",
+    "welcomeSubtitle": "Я можу проаналізувати фінанси, підказати ідеї для маркетингу або допомогти з керуванням командою.",
+    "suggestions": {
+      "marketing": "Ідеї для маркетингу",
+      "analysis": "Аналіз прибутку",
+      "employees": "Мотивація команди"
+    },
+    "checkImportantInformation": "Business Assistant AI може робити помилки. Перевіряйте важливу інформацію."
+  },
+  "Profile": {
+    "title": "Налаштування профілю",
+    "subtitle": "Керуйте своєю особистою інформацією та безпекою",
+    "personalInfo": "Особиста інформація",
+    "security": "Безпека",
+    "company": "Компанія",
+    "notSpecified": "Не вказано",
+    "successMessage": "Профіль успішно оновлено",
+    "fields": {
+      "fullName": "Повне ім'я",
+      "email": "Email",
+      "phone": "Телефон",
+      "jobTitle": "Посада",
+      "jobTitlePlaceholder": "Наприклад: Senior Java Developer",
+      "password": "Новий пароль",
+      "passwordHint": "Залиште це поле пустим, якщо не хочете змінювати пароль."
+    },
+    "buttons": {
+      "save": "Зберегти зміни",
+      "saving": "Збереження..."
+    }
+  },
+  "Dashboard": {
+    "title": "Фінансовий Дашборд",
+    "balance": "Баланс",
+    "companyCode": "Код",
+    "tabs": {
+      "transactions": "Транзакції",
+      "archive": "Архів",
+      "settings": "Налаштування"
+    },
+    "inputs": {
+      "amount": "Сума",
+      "category": "Категорія",
+      "description": "Опис",
+      "typeIncome": "Дохід",
+      "typeExpense": "Витрата"
+    },
+    "buttons": {
+      "add": "Додати",
+      "autoPayments": "Авто-платежі",
+      "toArchive": "В архів",
+      "saveSettings": "Зберегти налаштування"
+    },
+    "table": {
+      "date": "Дата",
+      "type": "Тип",
+      "category": "Категорія",
+      "amount": "Сума",
+      "description": "Опис",
+      "empty": "Транзакцій немає",
+      "selected": "вибрано"
+    },
+    "settings": {
+      "taxInfo": "Податкова інформація",
+      "autoPaymentsTitle": "Автоматичні платежі",
+      "taxType": "Тип оподаткування",
+      "revenueFrequency": "Періодичність доходу",
+      "rentLabel": "Вартість оренди (міс)",
+      "utilitiesLabel": "Комунальні (орієнтовно)"
+    },
+    "alerts": {
+      "loadError": "Не вдалося завантажити налаштування компанії. Спробуйте перелогінитись.",
+      "autoPaymentsInfo": "Ці суми будуть використані при натисканні кнопки \"Авто-платежі\" у вкладці транзакцій.",
+      "saved": "Налаштування збережено"
+    },
+    "enums": {
+      "FOP_1": "ФОП 1 група",
+      "FOP_2": "ФОП 2 група",
+      "FOP_3_5PERCENT": "ФОП 3 група (5%)",
+      "FOP_3_3PERCENT": "ФОП 3 група (3% + ПДВ)",
+      "GENERAL": "Загальна система",
+      "DAILY": "Щодня",
+      "MONTHLY": "Щомісяця",
+      "QUARTERLY": "Щокварталу",
+      "YEARLY": "Щороку"
+    }
   }
 }
