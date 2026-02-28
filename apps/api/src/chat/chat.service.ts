@@ -1,30 +1,54 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PrismaService } from '../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ChatService implements OnModuleInit {
+  private readonly logger = new Logger(ChatService.name);
   private genAI: GoogleGenerativeAI;
   private model: any;
   private apiKey: string;
   private activeModelName: string = 'gemini-1.5-flash';
+  private initializationPromise: Promise<void>;
 
-  constructor(private prisma: PrismaService) {
-    this.apiKey = process.env.GEMINI_API_KEY;
+  constructor(
+    private prisma: PrismaService,
+    private config: ConfigService,
+  ) {
+    this.apiKey = this.config.get<string>('GEMINI_API_KEY');
     if (this.apiKey) {
       this.genAI = new GoogleGenerativeAI(this.apiKey);
+    } else {
+      this.logger.warn(
+        'GEMINI_API_KEY is not set. AI features will be unavailable.',
+      );
     }
   }
 
   async onModuleInit() {
-    if (!this.apiKey) return;
+    this.initializationPromise = this.initializeAI();
+    return this.initializationPromise;
+  }
+
+  private async initializeAI() {
+    if (!this.apiKey) {
+      this.logger.warn(
+        'Skipping AI initialization: GEMINI_API_KEY is not configured.',
+      );
+      return;
+    }
 
     try {
+      this.logger.log('Fetching available Gemini models...');
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey}`,
       );
 
       if (!response.ok) {
+        this.logger.warn(
+          `Could not fetch models (${response.status} ${response.statusText}). Using default ${this.activeModelName}.`,
+        );
         this.initModel(this.activeModelName);
         return;
       }
@@ -52,24 +76,36 @@ export class ChatService implements OnModuleInit {
 
       if (bestModel) {
         this.activeModelName = bestModel;
+        this.logger.log(`Selected model: ${this.activeModelName}`);
       }
 
       this.initModel(this.activeModelName);
     } catch (error) {
+      this.logger.error(`Error during AI initialization: ${error.message}`);
       this.initModel('gemini-1.5-flash');
     }
   }
 
   private initModel(modelName: string) {
+    if (!this.genAI) {
+      this.logger.error('Cannot initialize model: genAI is undefined');
+      return;
+    }
+
     try {
       this.model = this.genAI.getGenerativeModel({
         model: modelName,
         tools: [{ googleSearch: {} } as any],
       });
+      this.logger.log(`Initialized model ${modelName} with tools.`);
     } catch (e) {
+      this.logger.warn(
+        `Failed to initialize model ${modelName} with tools, trying without...`,
+      );
       this.model = this.genAI.getGenerativeModel({
         model: modelName,
       });
+      this.logger.log(`Initialized model ${modelName} without tools.`);
     }
   }
 
@@ -190,6 +226,16 @@ export class ChatService implements OnModuleInit {
       - If you don't have specific data about the user's company, do not invent numbers.
       - Be polite but direct. Focus on value and solutions.
     `;
+
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+
+    if (!this.model) {
+      throw new Error(
+        'AI Model not initialized. Please check your GEMINI_API_KEY configuration.',
+      );
+    }
 
     try {
       const chatSession = this.model.startChat({

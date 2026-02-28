@@ -23,6 +23,7 @@ import {
   Mail,
   Briefcase,
 } from "lucide-react";
+import { API_URL } from "../../../../config/api";
 
 interface UserProfile {
   id: string;
@@ -79,7 +80,7 @@ export default function ProfilePage() {
       const userId = getUserId();
       try {
         const res = await fetch(
-          `http://localhost:3001/user/profile?userId=${userId}`
+          `${API_URL}/user/profile?userId=${userId}`
         );
         if (res.ok) {
           const data: UserProfile = await res.json();
@@ -120,7 +121,7 @@ export default function ProfilePage() {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/user/profile?userId=${userId}`,
+        `${API_URL}/user/profile?userId=${userId}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -180,7 +181,7 @@ export default function ProfilePage() {
                     className="bg-black text-4xl mb-4 shadow-xl"
                   >
                     {formData.fullName &&
-                    formData.fullName.trim().length > 0 ? (
+                      formData.fullName.trim().length > 0 ? (
                       formData.fullName.charAt(0).toUpperCase()
                     ) : (
                       <User size={48} />

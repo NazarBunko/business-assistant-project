@@ -8,18 +8,22 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  phone     String   @unique
-  password  String
-  fullName  String
-  jobTitle  String?
-  role      UserRole @default(EMPLOYEE)
-  companyId String
-  company   Company  @relation(fields: [companyId], references: [id])
-  chats     Chat[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  phone              String    @unique
+  password           String
+  fullName           String
+  jobTitle           String?
+  role               UserRole  @default(EMPLOYEE)
+  companyId          String?
+  company            Company?  @relation(fields: [companyId], references: [id])
+  monthlySalary      Float?
+  includeInAutoPay   Boolean   @default(false)
+  lastSalaryPaidAt   DateTime?
+  chats              Chat[]
+  salaryPayments     SalaryPayment[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model Chat {
@@ -59,8 +63,9 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users        User[]
-  transactions Transaction[]
+  users           User[]
+  transactions    Transaction[]
+  salaryPayments  SalaryPayment[]
 }
 
 model Transaction {
@@ -72,8 +77,22 @@ model Transaction {
   date        DateTime        @default(now())
   isArchived  Boolean         @default(false)
 
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId      String
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  salaryPayments SalaryPayment[]
+}
+
+model SalaryPayment {
+  id            String            @id @default(uuid())
+  amount        Float
+  type          SalaryPaymentType
+  paidAt        DateTime         @default(now())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactionId String            @unique
+  transaction   Transaction      @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  companyId     String
+  company       Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 enum UserRole {
@@ -100,4 +119,9 @@ enum TaxGroup {
 enum TransactionType {
   INCOME
   EXPENSE
+}
+
+enum SalaryPaymentType {
+  SALARY
+  BONUS
 }

@@ -81,6 +81,17 @@
       "terms": "Умови використання"
     }
   },
+  "Common": {
+    "errors": {
+      "forbidden": "Доступ заборонено",
+      "networkError": "Помилка мережі. Спробуйте пізніше.",
+      "userExists": "Користувач з таким email або телефоном вже існує",
+      "invalidCompanyCode": "Невірний код компанії",
+      "onlyOwnerOrAdminCanRemove": "Звільняти працівників можуть лише власник або адмін",
+      "employeeNotFound": "Працівника не знайдено",
+      "cannotRemoveOwner": "Неможливо звільнити власника компанії"
+    }
+  },
   "Auth": {
     "backToHome": "На головну",
     "Login": {
@@ -98,14 +109,19 @@
       }
     },
     "Register": {
-      "title": "Реєстрація компанії",
+      "title": "Реєстрація",
+      "tabOwner": "Власник компанії",
+      "tabEmployee": "Працівник",
       "companyName": "Назва підприємства",
-      "fullName": "ПІБ Власника (повністю)",
+      "inviteCode": "Код компанії (8 цифр)",
+      "fullName": "ПІБ (повністю)",
+      "fullNameOwner": "ПІБ Власника (повністю)",
       "email": "Email",
       "phone": "Номер телефону",
       "password": "Пароль",
       "confirmPassword": "Повторіть пароль",
       "submitButton": "Зареєструвати компанію",
+      "submitButtonEmployee": "Приєднатися до компанії",
       "submitting": "Реєстрація...",
       "alreadyHaveAccount": "Вже маєте акаунт?",
       "loginLink": "Увійти",
@@ -113,7 +129,8 @@
         "required": "Обов'язкове поле",
         "minLength": "Мінімум 6 символів",
         "passwordsMismatch": "Паролі не співпадають",
-        "defaultError": "Помилка реєстрації"
+        "defaultError": "Помилка реєстрації",
+        "inviteCodeInvalid": "Код має містити рівно 8 цифр"
       }
     }
   },
@@ -136,7 +153,65 @@
       "analysis": "Аналіз прибутку",
       "employees": "Мотивація команди"
     },
-    "checkImportantInformation": "Business Assistant AI може робити помилки. Перевіряйте важливу інформацію."
+    "checkImportantInformation": "Business Assistant AI може робити помилки. Перевіряйте важливу інформацію.",
+    "deleteChatConfirm": "Ви впевнені, що хочете видалити цей чат?",
+    "deleteChat": "Видалити чат",
+    "cancel": "Скасувати",
+    "deleteSuccess": "Чат видалено",
+    "deleteError": "Помилка видалення чату"
+  },
+  "Employees": {
+    "title": "Працівники",
+    "subtitle": "Список співробітників компанії",
+    "listEmpty": "Немає працівників",
+    "remove": "Звільнити",
+    "removeConfirm": "Звільнити цього працівника з компанії?",
+    "roleOwner": "Власник",
+    "roleAdmin": "Адмін",
+    "roleEmployee": "Працівник",
+    "fullName": "ПІБ",
+    "email": "Email",
+    "phone": "Телефон",
+    "role": "Роль",
+    "jobTitle": "Посада",
+    "removeSuccess": "Працівника звільнено",
+    "removeError": "Помилка при звільненні",
+    "cancel": "Скасувати",
+    "submitting": "Виконання...",
+    "salary": "Зарплата (міс.)",
+    "autoPay": "Автовиплата",
+    "pay": "Виплатити",
+    "payConfirmTitle": "Підтвердити виплату",
+    "payConfirmMessage": "Виплатити зарплату {name} в сумі {amount} ₴?",
+    "edit": "Змінити",
+    "editEmployee": "Редагувати працівника",
+    "save": "Зберегти",
+    "paySuccess": "Зарплату виплачено",
+    "payError": "Помилка виплати",
+    "updateSuccess": "Дані оновлено",
+    "updateError": "Помилка оновлення",
+    "noSalarySet": "Зарплата не призначена",
+    "lastPaid": "Остання виплата",
+    "never": "ніколи",
+    "jobTitlePlaceholder": "Наприклад: Менеджер",
+    "history": "Історія виплат",
+    "historyEmpty": "Немає виплат",
+    "bonus": "Премія",
+    "payBonus": "Видати премію",
+    "bonusAmount": "Сума премії",
+    "bonusSuccess": "Премію виплачено",
+    "bonusError": "Помилка виплати премії",
+    "filterAutoPayOnly": "Тільки в автовиплатах",
+    "sortBy": "Сортувати",
+    "sortByName": "За ПІБ",
+    "sortBySalaryAsc": "Зарплата (зростання)",
+    "sortBySalaryDesc": "Зарплата (спадання)",
+    "summaryTitle": "Загальна зарплата на місяць",
+    "paymentTypeSalary": "Зарплата",
+    "paymentTypeBonus": "Премія",
+    "date": "Дата",
+    "amount": "Сума",
+    "typeLabel": "Тип"
   },
   "Profile": {
     "title": "Налаштування профілю",
@@ -164,6 +239,7 @@
     "title": "Фінансовий Дашборд",
     "balance": "Баланс",
     "companyCode": "Код",
+    "salarySummary": "Зарплати на місяць (всього)",
     "tabs": {
       "transactions": "Транзакції",
       "archive": "Архів",
@@ -180,16 +256,8 @@
       "add": "Додати",
       "autoPayments": "Авто-платежі",
       "toArchive": "В архів",
-      "saveSettings": "Зберегти налаштування"
-    },
-    "table": {
-      "date": "Дата",
-      "type": "Тип",
-      "category": "Категорія",
-      "amount": "Сума",
-      "description": "Опис",
-      "empty": "Транзакцій немає",
-      "selected": "вибрано"
+      "saveSettings": "Зберегти налаштування",
+      "cancel": "Скасувати"
     },
     "settings": {
       "taxInfo": "Податкова інформація",
@@ -214,6 +282,42 @@
       "MONTHLY": "Щомісяця",
       "QUARTERLY": "Щокварталу",
       "YEARLY": "Щороку"
+    },
+    "tax": {
+      "title": "Розрахунок та оплата податку",
+      "subtitle": "За вибраний період з чистого прибутку (доходи мінус витрати)",
+      "selectMonths": "Оберіть місяці",
+      "calculate": "Розрахувати",
+      "pay": "Оплатити податок",
+      "totalIncome": "Доходи",
+      "totalExpenses": "Витрати",
+      "netProfit": "Чистий прибуток",
+      "taxAmount": "Сума податку",
+      "taxRate": "Ставка",
+      "esvAmount": "ЄСВ (за себе)",
+      "incomeTaxAmount": "Податок з доходу (ЄП + ВЗ)",
+      "period": "Період",
+      "paySuccess": "Податок оплачено",
+      "payError": "Помилка оплати",
+      "noMonths": "Немає даних за період. Додайте транзакції.",
+      "selectAtLeastOne": "Оберіть хоча б один місяць",
+      "cannotPayCurrentMonth": "Оплата податку за поточний місяць недоступна. Оберіть лише минулі місяці."
+    },
+    "table": {
+      "date": "Дата",
+      "type": "Тип",
+      "category": "Категорія",
+      "amount": "Сума",
+      "description": "Опис",
+      "empty": "Транзакцій немає",
+      "selected": "вибрано",
+      "delete": "Скасувати",
+      "deleteTitle": "Скасувати транзакцію?",
+      "deleteConfirm": "Скасувати цю транзакцію та повернути суму на баланс?",
+      "deleteConfirmButton": "Так, скасувати",
+      "deleteSuccess": "Транзакцію скасовано",
+      "deleteError": "Не вдалося скасувати транзакцію",
+      "cannotDeleteSalary": "Зарплатні та премійні платежі скасовувати не можна. Керуйте через розділ «Працівники»."
     }
   }
 }

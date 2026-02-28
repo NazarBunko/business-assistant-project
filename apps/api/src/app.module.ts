@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { CompanyModule } from './company/company.module';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -15,7 +16,10 @@ import { CompanyModule } from './company/company.module';
     PrismaModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: [
+        join(__dirname, '../../../packages/database/.env'),
+        join(__dirname, '../.env'),
+      ],
     }),
     ChatModule,
     UserModule,
@@ -25,4 +29,4 @@ import { CompanyModule } from './company/company.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

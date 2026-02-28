@@ -10,6 +10,7 @@ import {
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { RegisterEmployeeDto } from './dto/register-employee.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -20,6 +21,17 @@ export class AuthController {
   @Post('register')
   async register(@Body() dto: RegisterDto, @Res() res: Response) {
     const { accessToken, user } = await this.authService.register(dto);
+    this.setCookie(res, accessToken);
+    return res.json(user);
+  }
+
+  @Post('register/employee')
+  async registerEmployee(
+    @Body() dto: RegisterEmployeeDto,
+    @Res() res: Response,
+  ) {
+    const { accessToken, user } =
+      await this.authService.registerEmployee(dto);
     this.setCookie(res, accessToken);
     return res.json(user);
   }

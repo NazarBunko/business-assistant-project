@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useSnackbar } from "notistack";
 import {
   Paper,
   Typography,
@@ -24,6 +25,15 @@ import {
   Chip,
   Alert,
   CircularProgress,
+  FormGroup,
+  FormControlLabel,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  IconButton,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import {
@@ -34,7 +44,11 @@ import {
   RefreshCw,
   FileText,
   Wallet,
+  Calculator,
+  Trash2,
 } from "lucide-react";
+import { API_URL } from "../../../../config/api";
+import { getApiErrorMessage } from "../../../../lib/api-error-message";
 
 interface Transaction {
   id: string;
@@ -56,6 +70,7 @@ interface CompanySettings {
 
 export default function DashboardPage() {
   const t = useTranslations("Dashboard");
+  const { enqueueSnackbar } = useSnackbar();
   const [tab, setTab] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -64,6 +79,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [companySettings, setCompanySettings] =
     useState<CompanySettings | null>(null);
+  const [salarySummary, setSalarySummary] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [newTrans, setNewTrans] = useState({
@@ -72,6 +88,23 @@ export default function DashboardPage() {
     category: "",
     description: "",
   });
+
+  const [taxAvailableMonths, setTaxAvailableMonths] = useState<string[]>([]);
+  const [taxSelectedMonths, setTaxSelectedMonths] = useState<string[]>([]);
+  const [taxResult, setTaxResult] = useState<{
+    totalIncome: number;
+    totalExpenses: number;
+    netProfit: number;
+    taxAmount: number;
+    taxRate: number;
+    periodLabel: string;
+    esvAmount?: number;
+    incomeTaxAmount?: number;
+  } | null>(null);
+  const [taxCalculating, setTaxCalculating] = useState(false);
+  const [taxPaying, setTaxPaying] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  const [deletingTransaction, setDeletingTransaction] = useState(false);
 
   const getCompanyId = () => {
     if (typeof window !== "undefined") {
@@ -94,7 +127,7 @@ export default function DashboardPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/transactions?companyId=${companyId}&page=${page}&archived=${isArchived}`
+        `${API_URL}/transactions?companyId=${companyId}&page=${page}&archived=${isArchived}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -116,7 +149,7 @@ export default function DashboardPage() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3001/company/${companyId}`);
+      const res = await fetch(`${API_URL}/company/${companyId}`);
       if (res.ok) {
         const data = await res.json();
         setCompanySettings(data);
@@ -130,14 +163,122 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchSalarySummary = async () => {
+    try {
+      const res = await fetch(`${API_URL}/company/employees/salary-summary`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSalarySummary(data.totalMonthlySalary ?? 0);
+      }
+    } catch {
+      setSalarySummary(null);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
   }, []);
 
   useEffect(() => {
+    if (!isLoading) fetchSalarySummary();
+  }, [isLoading]);
+
+  useEffect(() => {
     if (tab === 0) fetchTransactions(false);
     if (tab === 1) fetchTransactions(true);
   }, [tab, page]);
+
+  const fetchTaxAvailableMonths = async () => {
+    try {
+      const res = await fetch(`${API_URL}/company/tax/available-months`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTaxAvailableMonths(Array.isArray(data) ? data : []);
+      }
+    } catch {
+      setTaxAvailableMonths([]);
+    }
+  };
+
+  useEffect(() => {
+    if (tab === 0) fetchTaxAvailableMonths();
+  }, [tab]);
+
+  const formatMonthLabel = (ym: string) => {
+    const [y = 0, m = 1] = ym.split("-").map(Number);
+    const d = new Date(y, m - 1, 1);
+    return d.toLocaleDateString("uk-UA", { month: "long", year: "numeric" });
+  };
+
+  const handleTaxMonthToggle = (month: string) => {
+    setTaxSelectedMonths((prev) =>
+      prev.includes(month) ? prev.filter((x) => x !== month) : [...prev, month].sort()
+    );
+    setTaxResult(null);
+  };
+
+  const handleCalculateTax = async () => {
+    if (taxSelectedMonths.length === 0) return;
+    setTaxCalculating(true);
+    setTaxResult(null);
+    try {
+      const res = await fetch(`${API_URL}/company/tax/calculate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ months: taxSelectedMonths }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTaxResult(data);
+      }
+    } catch {
+      setTaxResult(null);
+    } finally {
+      setTaxCalculating(false);
+    }
+  };
+
+  const handlePayTax = async () => {
+    if (!taxResult || taxResult.taxAmount <= 0) return;
+    setTaxPaying(true);
+    try {
+      const res = await fetch(`${API_URL}/company/tax/pay`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          amount: taxResult.taxAmount,
+          periodLabel: taxResult.periodLabel,
+          months: taxSelectedMonths,
+        }),
+      });
+      if (res.ok) {
+        setTaxResult(null);
+        setTaxSelectedMonths([]);
+        fetchTransactions(false);
+        fetchSettings();
+        enqueueSnackbar(t("tax.paySuccess"), { variant: "success" });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        enqueueSnackbar(getApiErrorMessage(data.message, t) || data.message || t("tax.payError"), { variant: "error" });
+      }
+    } catch {
+      enqueueSnackbar(t("tax.payError"), { variant: "error" });
+    } finally {
+      setTaxPaying(false);
+    }
+  };
+
+  const currentMonthStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  };
+  const canPayTaxForSelectedMonths = taxSelectedMonths.length > 0 && !taxSelectedMonths.includes(currentMonthStr());
 
   const handleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -145,8 +286,32 @@ export default function DashboardPage() {
     );
   };
 
+  const handleDeleteTransaction = async () => {
+    if (!transactionToDelete) return;
+    setDeletingTransaction(true);
+    try {
+      const res = await fetch(`${API_URL}/transactions/${transactionToDelete.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setTransactionToDelete(null);
+        fetchTransactions(tab === 1);
+        fetchSettings();
+        enqueueSnackbar(t("table.deleteSuccess"), { variant: "success" });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        enqueueSnackbar(getApiErrorMessage(data.message, t) || data.message || t("table.deleteError"), { variant: "error" });
+      }
+    } catch {
+      enqueueSnackbar(t("table.deleteError"), { variant: "error" });
+    } finally {
+      setDeletingTransaction(false);
+    }
+  };
+
   const handleArchive = async () => {
-    await fetch(`http://localhost:3001/transactions/archive`, {
+    await fetch(`${API_URL}/transactions/archive`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: selectedIds }),
@@ -158,7 +323,7 @@ export default function DashboardPage() {
   const handleCreateTransaction = async () => {
     const companyId = getCompanyId();
     if (!companyId) return;
-    await fetch(`http://localhost:3001/transactions?companyId=${companyId}`, {
+    await fetch(`${API_URL}/transactions?companyId=${companyId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...newTrans, amount: Number(newTrans.amount) }),
@@ -171,7 +336,7 @@ export default function DashboardPage() {
   const handleGenerateRecurring = async () => {
     const companyId = getCompanyId();
     if (!companyId) return;
-    await fetch(`http://localhost:3001/transactions/generate-recurring`, {
+    await fetch(`${API_URL}/transactions/generate-recurring`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ companyId }),
@@ -185,7 +350,7 @@ export default function DashboardPage() {
     if (!companySettings || !companyId) return;
     try {
       const res = await fetch(
-        `http://localhost:3001/company/${companyId}/settings`,
+        `${API_URL}/company/${companyId}/settings`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -193,11 +358,15 @@ export default function DashboardPage() {
         }
       );
       if (res.ok) {
-        alert(t("alerts.saved"));
+        enqueueSnackbar(t("alerts.saved"), { variant: "success" });
         fetchSettings();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        enqueueSnackbar(data.message || t("alerts.loadError"), { variant: "error" });
       }
     } catch (e) {
       console.error(e);
+      enqueueSnackbar(t("alerts.loadError"), { variant: "error" });
     }
   };
 
@@ -221,6 +390,13 @@ export default function DashboardPage() {
               icon={<Wallet size={16} />}
               label={`${t("balance")}: ${companySettings.balance} ₴`}
               className={`font-bold text-lg px-2! ${companySettings.balance >= 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+            />
+          )}
+          {salarySummary != null && salarySummary > 0 && (
+            <Chip
+              label={`${t("salarySummary")}: ${salarySummary} ₴`}
+              variant="outlined"
+              className="font-medium text-base"
             />
           )}
         </div>
@@ -264,7 +440,81 @@ export default function DashboardPage() {
           {(tab === 0 || tab === 1) && (
             <div className="space-y-4!">
               {tab === 0 && (
-                <div className="flex gap-2! flex-wrap bg-gray-50 p-4! rounded-xl mb-4!">
+                <>
+                  <Paper variant="outlined" className="p-4! rounded-xl">
+                    <Typography variant="h6" className="font-bold flex items-center gap-2! mb-1!">
+                      <Calculator size={20} /> {t("tax.title")}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" className="mb-3!">
+                      {t("tax.subtitle")}
+                    </Typography>
+                    {taxAvailableMonths.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {t("tax.noMonths")}
+                      </Typography>
+                    ) : (
+                      <>
+                        <Typography variant="subtitle2" className="mb-2!">
+                          {t("tax.selectMonths")}
+                        </Typography>
+                        <FormGroup row className="gap-2! mb-3!">
+                          {taxAvailableMonths.map((ym) => (
+                            <FormControlLabel
+                              key={ym}
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={taxSelectedMonths.includes(ym)}
+                                  onChange={() => handleTaxMonthToggle(ym)}
+                                />
+                              }
+                              label={formatMonthLabel(ym)}
+                            />
+                          ))}
+                        </FormGroup>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={handleCalculateTax}
+                          disabled={taxCalculating || taxSelectedMonths.length === 0}
+                          startIcon={taxCalculating ? <CircularProgress size={16} /> : <Calculator size={16} />}
+                        >
+                          {taxCalculating ? "..." : t("tax.calculate")}
+                        </Button>
+                        {taxResult && (
+                          <Box className="mt-4! p-3! bg-gray-50 rounded-lg">
+                            <Typography variant="subtitle2">{t("tax.period")}: {taxResult.periodLabel}</Typography>
+                            <Typography variant="body2">{t("tax.totalIncome")}: {taxResult.totalIncome} ₴</Typography>
+                            <Typography variant="body2">{t("tax.totalExpenses")}: {taxResult.totalExpenses} ₴</Typography>
+                            <Typography variant="body2" className="font-medium">{t("tax.netProfit")}: {taxResult.netProfit} ₴</Typography>
+                            {taxResult.esvAmount != null && (
+                              <Typography variant="body2">{t("tax.esvAmount")}: {taxResult.esvAmount} ₴</Typography>
+                            )}
+                            {taxResult.incomeTaxAmount != null && (
+                              <Typography variant="body2">{t("tax.incomeTaxAmount")} ({taxResult.taxRate}%): {taxResult.incomeTaxAmount} ₴</Typography>
+                            )}
+                            {taxResult.esvAmount == null && <Typography variant="body2">{t("tax.taxRate")}: {taxResult.taxRate}%</Typography>}
+                            <Typography variant="h6" className="font-bold mt-2!">{t("tax.taxAmount")}: {taxResult.taxAmount} ₴</Typography>
+                            {!canPayTaxForSelectedMonths && taxSelectedMonths.length > 0 && (
+                              <Typography variant="caption" color="text.secondary" className="block mt-1!">
+                                {t("tax.cannotPayCurrentMonth")}
+                              </Typography>
+                            )}
+                            <Button
+                              variant="contained"
+                              size="small"
+                              className="mt-2! bg-black"
+                              onClick={handlePayTax}
+                              disabled={taxPaying || taxResult.taxAmount <= 0 || !canPayTaxForSelectedMonths}
+                            >
+                              {taxPaying ? "..." : t("tax.pay")}
+                            </Button>
+                          </Box>
+                        )}
+                      </>
+                    )}
+                  </Paper>
+                  <div className="flex gap-2! flex-wrap bg-gray-50 p-4! rounded-xl mb-4!">
                   <TextField
                     label={t("inputs.amount")}
                     size="small"
@@ -322,6 +572,7 @@ export default function DashboardPage() {
                     {t("buttons.autoPayments")}
                   </Button>
                 </div>
+                </>
               )}
 
               {selectedIds.length > 0 && tab === 0 && (
@@ -351,13 +602,14 @@ export default function DashboardPage() {
                       <TableCell>{t("table.category")}</TableCell>
                       <TableCell>{t("table.amount")}</TableCell>
                       <TableCell>{t("table.description")}</TableCell>
+                      {tab === 0 && <TableCell align="right">{t("table.delete")}</TableCell>}
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {transactions.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={6}
+                          colSpan={tab === 0 ? 7 : 6}
                           align="center"
                           className="py-8! text-gray-500"
                         >
@@ -400,12 +652,39 @@ export default function DashboardPage() {
                           <TableCell className="text-gray-500">
                             {transaction.description}
                           </TableCell>
+                          {tab === 0 && (
+                            <TableCell align="right">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => setTransactionToDelete(transaction)}
+                                title={t("table.delete")}
+                              >
+                                <Trash2 size={18} />
+                              </IconButton>
+                            </TableCell>
+                          )}
                         </TableRow>
                       ))
                     )}
                   </TableBody>
                 </Table>
               </TableContainer>
+
+              <Dialog open={!!transactionToDelete} onClose={() => setTransactionToDelete(null)}>
+                <DialogTitle>{t("table.deleteTitle")}</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    {t("table.deleteConfirm")}
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setTransactionToDelete(null)}>{t("buttons.cancel")}</Button>
+                  <Button color="error" variant="contained" onClick={handleDeleteTransaction} disabled={deletingTransaction}>
+                    {deletingTransaction ? "..." : t("table.deleteConfirmButton")}
+                  </Button>
+                </DialogActions>
+              </Dialog>
 
               <div className="flex justify-center mt-4!">
                 <Pagination
@@ -504,11 +783,12 @@ export default function DashboardPage() {
                         fullWidth
                         label={t("settings.rentLabel")}
                         type="number"
-                        value={companySettings.rentAmount}
+                        placeholder="0"
+                        value={companySettings.rentAmount === 0 ? "" : companySettings.rentAmount}
                         onChange={(e) =>
                           setCompanySettings({
                             ...companySettings,
-                            rentAmount: Number(e.target.value),
+                            rentAmount: Number(e.target.value) || 0,
                           })
                         }
                       />
@@ -518,11 +798,12 @@ export default function DashboardPage() {
                         fullWidth
                         label={t("settings.utilitiesLabel")}
                         type="number"
-                        value={companySettings.utilitiesAmount}
+                        placeholder="0"
+                        value={companySettings.utilitiesAmount === 0 ? "" : companySettings.utilitiesAmount}
                         onChange={(e) =>
                           setCompanySettings({
                             ...companySettings,
-                            utilitiesAmount: Number(e.target.value),
+                            utilitiesAmount: Number(e.target.value) || 0,
                           })
                         }
                       />

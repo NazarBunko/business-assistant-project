@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { useSnackbar } from "notistack";
 import {
   Button,
   TextField,
@@ -10,11 +11,12 @@ import {
   Typography,
   Container,
   Box,
-  Alert,
   CircularProgress,
 } from "@mui/material";
 import { Link, useRouter } from "../../../../i18n/routing";
 import { ArrowLeft } from "lucide-react";
+import { API_URL } from "../../../../config/api";
+import { getApiErrorMessage } from "../../../../lib/api-error-message";
 
 interface LoginFormData {
   login: string;
@@ -24,8 +26,9 @@ interface LoginFormData {
 export default function LoginPage() {
   const t = useTranslations("Auth.Login");
   const tCommon = useTranslations("Auth");
+  const tRaw = useTranslations();
   const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -36,10 +39,8 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    setServerError(null);
-
     try {
-      const response = await fetch("http://localhost:3001/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -48,19 +49,20 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || t("errors.defaultError"));
+        enqueueSnackbar(
+          getApiErrorMessage(errorData.message || t("errors.defaultError"), tRaw),
+          { variant: "error" }
+        );
+        return;
       }
 
       const user = await response.json();
-      console.log("Login successful:", user);
-
       localStorage.setItem("user", JSON.stringify(user));
 
       router.push("/dashboard");
       router.refresh();
-    } catch (error: any) {
-      console.error(error);
-      setServerError(t("errors.invalidCredentials"));
+    } catch {
+      enqueueSnackbar(tRaw("Common.errors.networkError"), { variant: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -89,12 +91,6 @@ export default function LoginPage() {
           {t("title")}
         </Typography>
 
-        {serverError && (
-          <Alert severity="error" className="mb-4">
-            {serverError}
-          </Alert>
-        )}
-
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 mt-4"
@@ -104,7 +100,7 @@ export default function LoginPage() {
             fullWidth
             {...register("login", { required: t("errors.required") })}
             error={!!errors.login}
-            helperText={errors.login?.message}
+            helperText={errors.login?.message as string}
             disabled={isLoading}
           />
 
@@ -116,7 +112,7 @@ export default function LoginPage() {
               required: t("errors.passwordRequired"),
             })}
             error={!!errors.password}
-            helperText={errors.password?.message}
+            helperText={errors.password?.message as string}
             disabled={isLoading}
           />
 

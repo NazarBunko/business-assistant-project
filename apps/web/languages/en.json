@@ -81,6 +81,17 @@
       "terms": "Terms of Use"
     }
   },
+  "Common": {
+    "errors": {
+      "forbidden": "Access denied",
+      "networkError": "Network error. Please try again.",
+      "userExists": "User with this email or phone already exists",
+      "invalidCompanyCode": "Invalid company code",
+      "onlyOwnerOrAdminCanRemove": "Only owner or admin can remove employees",
+      "employeeNotFound": "Employee not found",
+      "cannotRemoveOwner": "Cannot remove company owner"
+    }
+  },
   "Auth": {
     "backToHome": "Back to Home",
     "Login": {
@@ -98,14 +109,19 @@
       }
     },
     "Register": {
-      "title": "Company Registration",
+      "title": "Registration",
+      "tabOwner": "Company Owner",
+      "tabEmployee": "Employee",
       "companyName": "Company Name",
-      "fullName": "Owner's Full Name",
+      "inviteCode": "Company Code (8 digits)",
+      "fullName": "Full Name",
+      "fullNameOwner": "Owner's Full Name",
       "email": "Email",
       "phone": "Phone Number",
       "password": "Password",
       "confirmPassword": "Repeat Password",
       "submitButton": "Register Company",
+      "submitButtonEmployee": "Join Company",
       "submitting": "Registering...",
       "alreadyHaveAccount": "Already have an account?",
       "loginLink": "Log In",
@@ -113,7 +129,8 @@
         "required": "Required field",
         "minLength": "Minimum 6 characters",
         "passwordsMismatch": "Passwords do not match",
-        "defaultError": "Registration failed"
+        "defaultError": "Registration failed",
+        "inviteCodeInvalid": "Code must be exactly 8 digits"
       }
     }
   },
@@ -136,7 +153,65 @@
       "analysis": "Profit analysis",
       "employees": "Team motivation"
     },
-    "checkImportantInformation": "Business Assistant AI can make mistakes. Check important information."
+    "checkImportantInformation": "Business Assistant AI can make mistakes. Check important information.",
+    "deleteChatConfirm": "Are you sure you want to delete this chat?",
+    "deleteChat": "Delete chat",
+    "cancel": "Cancel",
+    "deleteSuccess": "Chat deleted",
+    "deleteError": "Failed to delete chat"
+  },
+  "Employees": {
+    "title": "Employees",
+    "subtitle": "Company team members",
+    "listEmpty": "No employees",
+    "remove": "Remove",
+    "removeConfirm": "Remove this employee from the company?",
+    "roleOwner": "Owner",
+    "roleAdmin": "Admin",
+    "roleEmployee": "Employee",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "jobTitle": "Job Title",
+    "removeSuccess": "Employee removed",
+    "removeError": "Failed to remove employee",
+    "cancel": "Cancel",
+    "submitting": "Processing...",
+    "salary": "Salary (monthly)",
+    "autoPay": "Auto-pay",
+    "pay": "Pay",
+    "payConfirmTitle": "Confirm payment",
+    "payConfirmMessage": "Pay salary to {name} in the amount of {amount} ₴?",
+    "edit": "Edit",
+    "editEmployee": "Edit employee",
+    "save": "Save",
+    "paySuccess": "Salary paid",
+    "payError": "Payment failed",
+    "updateSuccess": "Updated",
+    "updateError": "Update failed",
+    "noSalarySet": "No salary set",
+    "lastPaid": "Last paid",
+    "never": "never",
+    "jobTitlePlaceholder": "e.g. Manager",
+    "history": "Payment history",
+    "historyEmpty": "No payments",
+    "bonus": "Bonus",
+    "payBonus": "Pay bonus",
+    "bonusAmount": "Bonus amount",
+    "bonusSuccess": "Bonus paid",
+    "bonusError": "Bonus payment failed",
+    "filterAutoPayOnly": "Auto-pay only",
+    "sortBy": "Sort by",
+    "sortByName": "By name",
+    "sortBySalaryAsc": "Salary (asc)",
+    "sortBySalaryDesc": "Salary (desc)",
+    "summaryTitle": "Total monthly salary",
+    "paymentTypeSalary": "Salary",
+    "paymentTypeBonus": "Bonus",
+    "date": "Date",
+    "amount": "Amount",
+    "typeLabel": "Type"
   },
   "Profile": {
     "title": "Profile Settings",
@@ -164,6 +239,7 @@
     "title": "Financial Dashboard",
     "balance": "Balance",
     "companyCode": "Code",
+    "salarySummary": "Total monthly salaries",
     "tabs": {
       "transactions": "Transactions",
       "archive": "Archive",
@@ -180,16 +256,8 @@
       "add": "Add",
       "autoPayments": "Auto-payments",
       "toArchive": "To Archive",
-      "saveSettings": "Save Settings"
-    },
-    "table": {
-      "date": "Date",
-      "type": "Type",
-      "category": "Category",
-      "amount": "Amount",
-      "description": "Description",
-      "empty": "No transactions",
-      "selected": "selected"
+      "saveSettings": "Save Settings",
+      "cancel": "Cancel"
     },
     "settings": {
       "taxInfo": "Tax Information",
@@ -214,6 +282,42 @@
       "MONTHLY": "Monthly",
       "QUARTERLY": "Quarterly",
       "YEARLY": "Yearly"
+    },
+    "tax": {
+      "title": "Tax calculation and payment",
+      "subtitle": "Based on net profit (income minus expenses) for selected period",
+      "selectMonths": "Select months",
+      "calculate": "Calculate",
+      "pay": "Pay tax",
+      "totalIncome": "Income",
+      "totalExpenses": "Expenses",
+      "netProfit": "Net profit",
+      "taxAmount": "Tax amount",
+      "taxRate": "Rate",
+      "esvAmount": "ЄСВ (for yourself)",
+      "incomeTaxAmount": "Tax on income (single tax + military levy)",
+      "period": "Period",
+      "paySuccess": "Tax paid",
+      "payError": "Payment failed",
+      "noMonths": "No data for period. Add transactions.",
+      "selectAtLeastOne": "Select at least one month",
+      "cannotPayCurrentMonth": "Tax payment for the current month is not allowed. Select only past months."
+    },
+    "table": {
+      "date": "Date",
+      "type": "Type",
+      "category": "Category",
+      "amount": "Amount",
+      "description": "Description",
+      "empty": "No transactions",
+      "selected": "selected",
+      "delete": "Undo",
+      "deleteTitle": "Undo transaction?",
+      "deleteConfirm": "Undo this transaction and restore the amount to balance?",
+      "deleteConfirmButton": "Yes, undo",
+      "deleteSuccess": "Transaction undone",
+      "deleteError": "Failed to undo transaction",
+      "cannotDeleteSalary": "Salary and bonus payments cannot be undone. Manage them in the Employees section."
     }
   }
 }

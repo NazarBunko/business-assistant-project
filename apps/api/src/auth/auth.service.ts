@@ -6,6 +6,7 @@ import {
 import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './dto/register.dto';
+import { RegisterEmployeeDto } from './dto/register-employee.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -88,14 +89,57 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.generateToken(user.id, user.email, user.role, user.companyId);
+    return this.generateToken(
+      user.id,
+      user.email,
+      user.role,
+      user.companyId ?? null,
+    );
+  }
+
+  async registerEmployee(dto: RegisterEmployeeDto) {
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: dto.email }, { phone: dto.phone }],
+      },
+    });
+    if (existingUser) {
+      throw new ConflictException('User already exists');
+    }
+
+    const company = await this.prisma.company.findUnique({
+      where: { inviteCode: dto.inviteCode },
+    });
+    if (!company) {
+      throw new ConflictException('Invalid company code');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        phone: dto.phone,
+        fullName: dto.fullName,
+        password: hashedPassword,
+        role: UserRole.EMPLOYEE,
+        jobTitle: 'Працівник',
+        companyId: company.id,
+      },
+    });
+
+    return this.generateToken(
+      user.id,
+      user.email,
+      user.role,
+      user.companyId ?? null,
+    );
   }
 
   private generateToken(
     userId: string,
     email: string,
     role: string,
-    companyId: string,
+    companyId: string | null,
   ) {
     const payload = { sub: userId, email, role, companyId };
     return {

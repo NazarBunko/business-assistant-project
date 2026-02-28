@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { useSnackbar } from "notistack";
 import {
   Paper,
   IconButton,
@@ -13,6 +14,11 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import {
   Bot,
@@ -26,6 +32,7 @@ import {
   Check,
   X,
 } from "lucide-react";
+import { API_URL } from "../../../../config/api";
 
 interface Message {
   id: string;
@@ -40,6 +47,7 @@ interface ChatSession {
 
 export default function ChatPage() {
   const t = useTranslations("Chat");
+  const { enqueueSnackbar } = useSnackbar();
 
   const [chats, setChats] = useState<ChatSession[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -50,6 +58,7 @@ export default function ChatPage() {
 
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [chatToDeleteId, setChatToDeleteId] = useState<string | null>(null);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
 
@@ -76,7 +85,7 @@ export default function ChatPage() {
     const userId = getUserId();
     try {
       const res = await fetch(
-        `http://localhost:3001/chat/conversations?userId=${userId}`
+        `${API_URL}/chat/conversations?userId=${userId}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -98,7 +107,7 @@ export default function ChatPage() {
       setIsLoading(true);
       try {
         const res = await fetch(
-          `http://localhost:3001/chat/${activeChatId}/messages?userId=${userId}`
+          `${API_URL}/chat/${activeChatId}/messages?userId=${userId}`
         );
         if (res.ok) {
           const data = await res.json();
@@ -136,7 +145,7 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/chat", {
+      const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -213,7 +222,7 @@ export default function ChatPage() {
     const userId = getUserId();
 
     try {
-      await fetch(`http://localhost:3001/chat/${editingChatId}`, {
+      await fetch(`${API_URL}/chat/${editingChatId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, title: editTitle }),
@@ -231,28 +240,26 @@ export default function ChatPage() {
     }
   };
 
-  const deleteChat = async () => {
-    if (!selectedChatId) return;
+  const performDeleteChat = async (chatId: string) => {
     const userId = getUserId();
-
-    if (confirm("Ви впевнені, що хочете видалити цей чат?")) {
-      try {
-        await fetch(
-          `http://localhost:3001/chat/${selectedChatId}?userId=${userId}`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        setChats((prev) => prev.filter((c) => c.id !== selectedChatId));
-        if (activeChatId === selectedChatId) {
-          handleNewChat();
-        }
-      } catch (e) {
-        console.error(e);
+    try {
+      const res = await fetch(
+        `${API_URL}/chat/${chatId}?userId=${userId}`,
+        { method: "DELETE" }
+      );
+      if (res.ok) {
+        setChats((prev) => prev.filter((c) => c.id !== chatId));
+        if (activeChatId === chatId) handleNewChat();
+        enqueueSnackbar(t("deleteSuccess"), { variant: "success" });
+      } else {
+        enqueueSnackbar(t("deleteError"), { variant: "error" });
       }
+    } catch (e) {
+      console.error(e);
+      enqueueSnackbar(t("deleteError"), { variant: "error" });
+    } finally {
+      setChatToDeleteId(null);
     }
-    handleMenuClose();
   };
 
   return (
@@ -346,13 +353,36 @@ export default function ChatPage() {
           </ListItemIcon>
           Змінити назву
         </MenuItem>
-        <MenuItem onClick={deleteChat} className="text-sm gap-2 text-red-600">
+        <MenuItem
+          onClick={() => {
+            if (selectedChatId) setChatToDeleteId(selectedChatId);
+            handleMenuClose();
+          }}
+          className="text-sm gap-2 text-red-600"
+        >
           <ListItemIcon>
             <Trash2 size={16} className="text-red-600" />
           </ListItemIcon>
-          Видалити чат
+          {t("deleteChat")}
         </MenuItem>
       </Menu>
+
+      <Dialog open={!!chatToDeleteId} onClose={() => setChatToDeleteId(null)}>
+        <DialogTitle>{t("deleteChat")}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{t("deleteChatConfirm")}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setChatToDeleteId(null)}>{t("cancel")}</Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => chatToDeleteId && performDeleteChat(chatToDeleteId)}
+          >
+            {t("deleteChat")}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Paper
         elevation={0}
@@ -393,11 +423,10 @@ export default function ChatPage() {
                   <div
                     className={`
                     p-3 sm:p-4 rounded-2xl text-sm sm:text-base leading-relaxed whitespace-pre-wrap max-w-[85%] shadow-sm
-                    ${
-                      msg.role === "user"
+                    ${msg.role === "user"
                         ? "bg-gray-100 text-gray-900 rounded-tr-sm"
                         : "bg-blue-50 text-gray-800 rounded-tl-sm border border-blue-100"
-                    }
+                      }
                   `}
                   >
                     {msg.content}
