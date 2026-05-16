@@ -110,14 +110,23 @@ function HeroSection() {
           <Grid size={{ xs: 12, md: 6 }} className="text-center md:text-left">
             <Typography
               component="h1"
-              className="font-extrabold text-gray-900 mb-4 sm:mb-6 leading-tight text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
+              className="font-extrabold text-gray-900 mb-4 sm:mb-6 leading-tight"
+              sx={{
+                fontSize: {
+                  xs: "1.875rem",
+                  sm: "2.25rem",
+                  md: "3rem",
+                  lg: "3.75rem",
+                },
+              }}
             >
               {t("title_part1")} <br />
               <span className="text-primary">{t("title_part2")}</span>
             </Typography>
             <Typography
               color="text.secondary"
-              className="mb-6 sm:mb-8 font-normal leading-relaxed text-base sm:text-lg md:text-xl"
+              className="mb-6 sm:mb-8 font-normal leading-relaxed"
+              sx={{ fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" } }}
             >
               {t("subtitle")}
             </Typography>
@@ -562,7 +571,15 @@ export default function HomePage() {
           </div>
 
           <Typography
-            className="font-extrabold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+            className="font-extrabold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight"
+            sx={{
+              fontSize: {
+                xs: "1.5rem",
+                sm: "1.875rem",
+                md: "2.25rem",
+                lg: "3rem",
+              },
+            }}
           >
             {t.rich("cta.title", {
               br: () => <br />,
@@ -570,7 +587,8 @@ export default function HomePage() {
           </Typography>
 
           <Typography
-            className="mb-8 sm:mb-9 md:mb-10 text-gray-600 mx-auto font-normal leading-relaxed mt-3! text-base sm:text-lg md:text-xl max-w-lg"
+            className="mb-8 sm:mb-9 md:mb-10 text-gray-600 mx-auto font-normal leading-relaxed mt-3! max-w-lg"
+            sx={{ fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" } }}
           >
             {t("cta.description")}
           </Typography>

@@ -8,7 +8,7 @@ import { theme } from '../../styles/theme';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AppRouterCacheProvider>
+    <AppRouterCacheProvider options={{ enableCssLayer: true }}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SnackbarProvider

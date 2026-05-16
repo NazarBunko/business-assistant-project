@@ -45,7 +45,7 @@ export class AuthController {
 
   @Post('logout')
   logout(@Res() res: Response) {
-    res.clearCookie('accessToken');
+    res.clearCookie('accessToken', this.getCookieOptions());
     return res.json({ message: 'Logged out' });
   }
 
@@ -55,12 +55,17 @@ export class AuthController {
     return req.user; 
   }
 
-  private setCookie(res: Response, token: string) {
-    res.cookie('accessToken', token, {
+  private getCookieOptions() {
+    const isProduction = process.env.NODE_ENV === 'production';
+    return {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: (isProduction ? 'none' : 'strict') as 'none' | 'strict',
       maxAge: 24 * 60 * 60 * 1000,
-    });
+    };
+  }
+
+  private setCookie(res: Response, token: string) {
+    res.cookie('accessToken', token, this.getCookieOptions());
   }
 }

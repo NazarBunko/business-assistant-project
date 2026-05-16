@@ -307,7 +307,10 @@ export default function AdminDashboardPage() {
                         <Typography className="text-gray-500 mb-1 sm:mb-2 text-xs sm:text-sm">
                           Total Companies
                         </Typography>
-                        <Typography className="font-bold text-gray-900 text-2xl sm:text-3xl md:text-4xl">
+                        <Typography
+                          className="font-bold text-gray-900"
+                          sx={{ fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.25rem" } }}
+                        >
                           {stats.totalCompanies}
                         </Typography>
                       </Box>
@@ -328,7 +331,10 @@ export default function AdminDashboardPage() {
                         <Typography className="text-gray-500 mb-1 sm:mb-2 text-xs sm:text-sm">
                           Total Users
                         </Typography>
-                        <Typography className="font-bold text-gray-900 text-2xl sm:text-3xl md:text-4xl">
+                        <Typography
+                          className="font-bold text-gray-900"
+                          sx={{ fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.25rem" } }}
+                        >
                           {stats.totalUsers}
                         </Typography>
                       </Box>
@@ -349,7 +355,10 @@ export default function AdminDashboardPage() {
                         <Typography className="text-gray-500 mb-1 sm:mb-2 text-xs sm:text-sm">
                           Active Users
                         </Typography>
-                        <Typography className="font-bold text-gray-900 text-2xl sm:text-3xl md:text-4xl">
+                        <Typography
+                          className="font-bold text-gray-900"
+                          sx={{ fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.25rem" } }}
+                        >
                           {stats.totalActiveUsers}
                         </Typography>
                       </Box>
@@ -370,7 +379,10 @@ export default function AdminDashboardPage() {
                         <Typography className="text-gray-500 mb-1 sm:mb-2 text-xs sm:text-sm">
                           Open Tickets
                         </Typography>
-                        <Typography className="font-bold text-gray-900 text-2xl sm:text-3xl md:text-4xl">
+                        <Typography
+                          className="font-bold text-gray-900"
+                          sx={{ fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.25rem" } }}
+                        >
                           {stats.openTickets}
                         </Typography>
                       </Box>
