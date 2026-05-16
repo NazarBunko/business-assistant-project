@@ -16,6 +16,7 @@ import {
   IconButton,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Divider,
@@ -299,7 +300,7 @@ export default function AdminDashboardPage() {
           ) : stats ? (
             <>
               <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} className="mb-6 sm:mb-7 md:mb-8">
-                <Grid item xs={12} sm={6} lg={3}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Paper className="p-4 sm:p-5 md:p-7 rounded-xl sm:rounded-2xl border border-gray-200 hover:shadow-md transition-shadow">
                     <Box className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
                       <Box className="flex-1 min-w-0">
@@ -320,7 +321,7 @@ export default function AdminDashboardPage() {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} sm={6} lg={3}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Paper className="p-4 sm:p-5 md:p-7 rounded-xl sm:rounded-2xl border border-gray-200 hover:shadow-md transition-shadow">
                     <Box className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
                       <Box className="flex-1 min-w-0">
@@ -341,7 +342,7 @@ export default function AdminDashboardPage() {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} sm={6} lg={3}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Paper className="p-4 sm:p-5 md:p-7 rounded-xl sm:rounded-2xl border border-gray-200 hover:shadow-md transition-shadow">
                     <Box className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
                       <Box className="flex-1 min-w-0">
@@ -362,7 +363,7 @@ export default function AdminDashboardPage() {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} sm={6} lg={3}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Paper className="p-4 sm:p-5 md:p-7 rounded-xl sm:rounded-2xl border border-gray-200 hover:shadow-md transition-shadow">
                     <Box className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
                       <Box className="flex-1 min-w-0">
@@ -385,7 +386,7 @@ export default function AdminDashboardPage() {
               </Grid>
 
               <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }}>
                   <Paper className="p-4 sm:p-5 md:p-8 rounded-xl sm:rounded-2xl border border-gray-200">
                     <Typography className="font-bold text-gray-900 mb-4 sm:mb-5 md:mb-6 text-lg sm:text-xl">
                       Platform Activity
@@ -423,7 +424,7 @@ export default function AdminDashboardPage() {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <Paper className="p-4 sm:p-5 md:p-8 rounded-xl sm:rounded-2xl border border-gray-200">
                     <Typography className="font-bold text-gray-900 mb-6 sm:mb-7 md:mb-8 text-lg sm:text-xl">
                       Quick Actions
