@@ -55,6 +55,9 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: "none",
+        },
+        contained: {
+          boxShadow: "none",
           "&:hover": {
             boxShadow: "none",
             backgroundColor: colors.primary,

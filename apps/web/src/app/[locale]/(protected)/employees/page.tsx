@@ -30,6 +30,7 @@ import {
 } from "@mui/material";
 import { UserX, Pencil, Banknote, History, Gift } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
 import { getApiErrorMessage } from "../../../../lib/api-error-message";
 
 interface Employee {
@@ -89,7 +90,7 @@ export default function EmployeesPage() {
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/company/employees`, {
+      const res = await apiFetch(`${API_URL}/company/employees`, {
         credentials: "include",
       });
       if (!res.ok) {
@@ -114,7 +115,7 @@ export default function EmployeesPage() {
 
   const fetchSalarySummary = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/company/employees/salary-summary`, {
+      const res = await apiFetch(`${API_URL}/company/employees/salary-summary`, {
         credentials: "include",
       });
       if (res.ok) {
@@ -170,7 +171,7 @@ export default function EmployeesPage() {
       setHistoryLoading(true);
       setHistoryList([]);
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `${API_URL}/company/employees/${employee.id}/salary-history`,
           { credentials: "include" }
         );
@@ -206,7 +207,7 @@ export default function EmployeesPage() {
     }
     setBonusSubmitting(true);
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/company/employees/${bonusTarget.id}/pay-bonus`,
         {
           method: "POST",
@@ -240,7 +241,7 @@ export default function EmployeesPage() {
     if (!removeTarget) return;
     setRemoving(true);
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/company/employees/${removeTarget.id}`,
         { method: "DELETE", credentials: "include" }
       );
@@ -284,7 +285,7 @@ export default function EmployeesPage() {
         showError(t("updateError"));
         return;
       }
-      const res = await fetch(`${API_URL}/company/employees/${editTarget.id}`, {
+      const res = await apiFetch(`${API_URL}/company/employees/${editTarget.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -308,7 +309,7 @@ export default function EmployeesPage() {
   const handleAutoPayToggle = async (employee: Employee) => {
     if (!employee.monthlySalary || employee.monthlySalary <= 0) return;
     try {
-      const res = await fetch(`${API_URL}/company/employees/${employee.id}`, {
+      const res = await apiFetch(`${API_URL}/company/employees/${employee.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -333,7 +334,7 @@ export default function EmployeesPage() {
     }
     setPayingId(employee.id);
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/company/employees/${employee.id}/pay-salary`,
         { method: "POST", credentials: "include" }
       );

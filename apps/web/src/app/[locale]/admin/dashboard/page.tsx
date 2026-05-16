@@ -34,6 +34,8 @@ import {
   Menu,
 } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
+import { clearAuthSession } from "../../../../lib/auth-token";
 import { useSnackbar } from "notistack";
 import Link from "next/link";
 
@@ -70,7 +72,7 @@ export default function AdminDashboardPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${API_URL}/admin/dashboard/stats`, {
+      const res = await apiFetch(`${API_URL}/admin/dashboard/stats`, {
         credentials: "include",
       });
 
@@ -88,10 +90,15 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    router.push(`/${locale}/admin/login`);
+  const handleLogout = async () => {
+    try {
+      await apiFetch(`${API_URL}/auth/logout`, { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      clearAuthSession();
+      router.push(`/${locale}/admin/login`);
+    }
   };
 
   const navItems = [

@@ -27,6 +27,8 @@ import {
   Menu,
 } from "lucide-react";
 import { API_URL } from "../../../config/api";
+import { apiFetch } from "../../../lib/api-fetch";
+import { clearAuthSession } from "../../../lib/auth-token";
 
 export default function ProtectedLayout({
   children,
@@ -48,14 +50,11 @@ export default function ProtectedLayout({
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await apiFetch(`${API_URL}/auth/logout`, { method: "POST" });
     } catch (error) {
       console.error("Помилка при виході:", error);
     } finally {
-      localStorage.removeItem("user");
+      clearAuthSession();
       router.replace("/");
       router.refresh();
     }

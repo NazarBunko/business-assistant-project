@@ -38,6 +38,8 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
+import { clearAuthSession } from "../../../../lib/auth-token";
 import { useSnackbar } from "notistack";
 import Link from "next/link";
 
@@ -76,7 +78,7 @@ export default function AdminUsersPage() {
     setLoading(true);
     try {
       const url = `${API_URL}/admin/users?page=${page}${search ? `&search=${search}` : ""}`;
-      const res = await fetch(url, { credentials: "include" });
+      const res = await apiFetch(url, { credentials: "include" });
 
       if (res.ok) {
         const data = await res.json();
@@ -103,7 +105,7 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       const endpoint = isBlocked ? "unblock" : "block";
-      const res = await fetch(`${API_URL}/admin/users/${userId}/${endpoint}`, {
+      const res = await apiFetch(`${API_URL}/admin/users/${userId}/${endpoint}`, {
         method: "POST",
         credentials: "include",
       });
@@ -126,7 +128,7 @@ export default function AdminUsersPage() {
     if (!deleteDialog) return;
     setActionLoading(true);
     try {
-      const res = await fetch(`${API_URL}/admin/users/${deleteDialog}`, {
+      const res = await apiFetch(`${API_URL}/admin/users/${deleteDialog}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -146,10 +148,15 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    router.push(`/${locale}/admin/login`);
+  const handleLogout = async () => {
+    try {
+      await apiFetch(`${API_URL}/auth/logout`, { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      clearAuthSession();
+      router.push(`/${locale}/admin/login`);
+    }
   };
 
   const getRoleColor = (role: string) => {

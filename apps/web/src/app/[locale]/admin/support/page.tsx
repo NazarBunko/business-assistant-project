@@ -42,6 +42,8 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
+import { clearAuthSession } from "../../../../lib/auth-token";
 import { useSnackbar } from "notistack";
 import Link from "next/link";
 
@@ -97,7 +99,7 @@ export default function AdminSupportPage() {
     setLoading(true);
     try {
       const url = `${API_URL}/admin/tickets?page=${page}${statusFilter ? `&status=${statusFilter}` : ""}`;
-      const res = await fetch(url, { credentials: "include" });
+      const res = await apiFetch(url, { credentials: "include" });
 
       if (res.ok) {
         const data = await res.json();
@@ -115,7 +117,7 @@ export default function AdminSupportPage() {
   const fetchTicketDetails = async (ticketId: string) => {
     setActionLoading(true);
     try {
-      const res = await fetch(`${API_URL}/admin/tickets/${ticketId}`, {
+      const res = await apiFetch(`${API_URL}/admin/tickets/${ticketId}`, {
         credentials: "include",
       });
 
@@ -137,7 +139,7 @@ export default function AdminSupportPage() {
     if (!selectedTicket || !responseText.trim()) return;
     setActionLoading(true);
     try {
-      const res = await fetch(`${API_URL}/admin/tickets/${selectedTicket.id}/responses`, {
+      const res = await apiFetch(`${API_URL}/admin/tickets/${selectedTicket.id}/responses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -160,7 +162,7 @@ export default function AdminSupportPage() {
     if (!selectedTicket) return;
     setActionLoading(true);
     try {
-      const res = await fetch(`${API_URL}/admin/tickets/${selectedTicket.id}`, {
+      const res = await apiFetch(`${API_URL}/admin/tickets/${selectedTicket.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -183,7 +185,7 @@ export default function AdminSupportPage() {
     if (!confirm("Delete this ticket?")) return;
     setActionLoading(true);
     try {
-      const res = await fetch(`${API_URL}/admin/tickets/${ticketId}`, {
+      const res = await apiFetch(`${API_URL}/admin/tickets/${ticketId}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -200,10 +202,15 @@ export default function AdminSupportPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    router.push(`/${locale}/admin/login`);
+  const handleLogout = async () => {
+    try {
+      await apiFetch(`${API_URL}/auth/logout`, { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      clearAuthSession();
+      router.push(`/${locale}/admin/login`);
+    }
   };
 
   const getStatusColor = (status: string) => {

@@ -31,6 +31,7 @@ import {
   Send,
 } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
 
 interface UserProfile {
   id: string;
@@ -90,7 +91,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `${API_URL}/user/profile`,
           {
             credentials: "include",
@@ -133,7 +134,7 @@ export default function ProfilePage() {
     if (!payload.password) delete payload.password;
 
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/user/profile`,
         {
           method: "PATCH",
@@ -170,7 +171,7 @@ export default function ProfilePage() {
 
     setSendingSupport(true);
     try {
-      const res = await fetch(`${API_URL}/support/request`, {
+      const res = await apiFetch(`${API_URL}/support/request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

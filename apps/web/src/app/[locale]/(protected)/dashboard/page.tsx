@@ -51,6 +51,7 @@ import {
   Clock,
 } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
 import { getApiErrorMessage } from "../../../../lib/api-error-message";
 
 function toInvoiceNumber(value: unknown): number {
@@ -170,7 +171,7 @@ export default function DashboardPage() {
 
   const fetchTransactions = async (isArchived = false) => {
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/transactions?page=${page}&archived=${isArchived}`,
         {
           credentials: "include",
@@ -196,7 +197,7 @@ export default function DashboardPage() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/company/${companyId}`, {
+      const res = await apiFetch(`${API_URL}/company/${companyId}`, {
         credentials: "include",
       });
       if (res.ok) {
@@ -214,7 +215,7 @@ export default function DashboardPage() {
 
   const fetchSalarySummary = async () => {
     try {
-      const res = await fetch(`${API_URL}/company/employees/salary-summary`, {
+      const res = await apiFetch(`${API_URL}/company/employees/salary-summary`, {
         credentials: "include",
       });
       if (res.ok) {
@@ -242,7 +243,7 @@ export default function DashboardPage() {
 
   const fetchTaxAvailableMonths = async () => {
     try {
-      const res = await fetch(`${API_URL}/company/tax/available-months`, {
+      const res = await apiFetch(`${API_URL}/company/tax/available-months`, {
         credentials: "include",
       });
       if (res.ok) {
@@ -265,7 +266,7 @@ export default function DashboardPage() {
   const fetchInvoices = async () => {
     try {
       const url = `${API_URL}/invoices?page=${invoicePage}${invoiceStatusFilter ? `&status=${invoiceStatusFilter}` : ""}`;
-      const res = await fetch(url, { credentials: "include" });
+      const res = await apiFetch(url, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setInvoices(data.data);
@@ -278,7 +279,7 @@ export default function DashboardPage() {
 
   const fetchInvoiceStats = async () => {
     try {
-      const res = await fetch(`${API_URL}/invoices/stats`, {
+      const res = await apiFetch(`${API_URL}/invoices/stats`, {
         credentials: "include",
       });
       if (res.ok) {
@@ -309,7 +310,7 @@ export default function DashboardPage() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/invoices`, {
+      const res = await apiFetch(`${API_URL}/invoices`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -342,7 +343,7 @@ export default function DashboardPage() {
 
   const handleViewInvoice = async (id: string) => {
     try {
-      const res = await fetch(`${API_URL}/invoices/${id}`, {
+      const res = await apiFetch(`${API_URL}/invoices/${id}`, {
         credentials: "include",
       });
       if (res.ok) {
@@ -359,7 +360,7 @@ export default function DashboardPage() {
     if (!confirm(t("invoices.messages.deleteConfirm"))) return;
 
     try {
-      const res = await fetch(`${API_URL}/invoices/${id}`, {
+      const res = await apiFetch(`${API_URL}/invoices/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -381,7 +382,7 @@ export default function DashboardPage() {
     if (!selectedInvoice) return;
 
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/invoices/${selectedInvoice.id}/status`,
         {
           method: "PATCH",
@@ -474,11 +475,10 @@ export default function DashboardPage() {
     try {
       await Promise.all(
         selectedInvoiceIds.map(id =>
-          fetch(`${API_URL}/invoices/${id}/status`, {
+          apiFetch(`${API_URL}/invoices/${id}/status`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: bulkStatus }),
-            credentials: "include",
           })
         )
       );
@@ -497,7 +497,7 @@ export default function DashboardPage() {
 
   const handleQuickStatusChange = async (invoiceId: string, newStatus: string) => {
     try {
-      const res = await fetch(`${API_URL}/invoices/${invoiceId}/status`, {
+      const res = await apiFetch(`${API_URL}/invoices/${invoiceId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -613,7 +613,7 @@ export default function DashboardPage() {
     setTaxCalculating(true);
     setTaxResult(null);
     try {
-      const res = await fetch(`${API_URL}/company/tax/calculate`, {
+      const res = await apiFetch(`${API_URL}/company/tax/calculate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -634,7 +634,7 @@ export default function DashboardPage() {
     if (!taxResult || taxResult.taxAmount <= 0) return;
     setTaxPaying(true);
     try {
-      const res = await fetch(`${API_URL}/company/tax/pay`, {
+      const res = await apiFetch(`${API_URL}/company/tax/pay`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -677,7 +677,7 @@ export default function DashboardPage() {
     if (!transactionToDelete) return;
     setDeletingTransaction(true);
     try {
-      const res = await fetch(`${API_URL}/transactions/${transactionToDelete.id}`, {
+      const res = await apiFetch(`${API_URL}/transactions/${transactionToDelete.id}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -698,7 +698,7 @@ export default function DashboardPage() {
   };
 
   const handleArchive = async () => {
-    await fetch(`${API_URL}/transactions/archive`, {
+    await apiFetch(`${API_URL}/transactions/archive`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -709,7 +709,7 @@ export default function DashboardPage() {
   };
 
   const handleCreateTransaction = async () => {
-    await fetch(`${API_URL}/transactions`, {
+    await apiFetch(`${API_URL}/transactions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -721,7 +721,7 @@ export default function DashboardPage() {
   };
 
   const handleGenerateRecurring = async () => {
-    await fetch(`${API_URL}/transactions/generate-recurring`, {
+    await apiFetch(`${API_URL}/transactions/generate-recurring`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -734,7 +734,7 @@ export default function DashboardPage() {
     const companyId = getCompanyId();
     if (!companySettings || !companyId) return;
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/company/${companyId}/settings`,
         {
           method: "PATCH",

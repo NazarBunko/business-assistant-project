@@ -33,6 +33,7 @@ import {
   X,
 } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
 
 interface Message {
   id: string;
@@ -83,7 +84,7 @@ export default function ChatPage() {
 
   const loadChats = async () => {
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/chat/conversations`,
         {
           credentials: "include",
@@ -107,7 +108,7 @@ export default function ChatPage() {
     const loadMessages = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `${API_URL}/chat/${activeChatId}/messages`,
           {
             credentials: "include",
@@ -148,7 +149,7 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/chat`, {
+      const response = await apiFetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -224,7 +225,7 @@ export default function ChatPage() {
     if (!editingChatId || !editTitle.trim()) return;
 
     try {
-      await fetch(`${API_URL}/chat/${editingChatId}`, {
+      await apiFetch(`${API_URL}/chat/${editingChatId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -245,7 +246,7 @@ export default function ChatPage() {
 
   const performDeleteChat = async (chatId: string) => {
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_URL}/chat/${chatId}`,
         { 
           method: "DELETE",

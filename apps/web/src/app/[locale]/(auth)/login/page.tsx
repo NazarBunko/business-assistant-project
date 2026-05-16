@@ -16,6 +16,8 @@ import {
 import { Link, useRouter } from "../../../../i18n/routing";
 import { ArrowLeft } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
+import { persistAuthSession } from "../../../../lib/auth-token";
 import { resolveApiError } from "../../../../lib/api-error-message";
 
 interface LoginFormData {
@@ -40,11 +42,10 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await apiFetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -56,8 +57,8 @@ export default function LoginPage() {
         return;
       }
 
-      const user = await response.json();
-      localStorage.setItem("user", JSON.stringify(user));
+      const authData = await response.json();
+      persistAuthSession(authData);
 
       router.push("/dashboard");
       router.refresh();

@@ -17,6 +17,8 @@ import { Link, useRouter } from "../../../../i18n/routing";
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
+import { persistAuthSession } from "../../../../lib/auth-token";
 import { resolveApiError } from "../../../../lib/api-error-message";
 
 type RegisterMode = "owner" | "employee";
@@ -41,7 +43,7 @@ export default function RegisterPage() {
 
   const onSubmitOwner = async (data: Record<string, string>) => {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
+      const response = await apiFetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -51,15 +53,13 @@ export default function RegisterPage() {
           phone: data.phone,
           password: data.password,
         }),
-        credentials: "include",
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         showError(errorData);
         return;
       }
-      const result = await response.json();
-      localStorage.setItem("user", JSON.stringify(result));
+      persistAuthSession(await response.json());
       router.push("/dashboard");
       router.refresh();
     } catch {
@@ -69,7 +69,7 @@ export default function RegisterPage() {
 
   const onSubmitEmployee = async (data: Record<string, string>) => {
     try {
-      const response = await fetch(`${API_URL}/auth/register/employee`, {
+      const response = await apiFetch(`${API_URL}/auth/register/employee`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -79,15 +79,13 @@ export default function RegisterPage() {
           phone: data.phone,
           password: data.password,
         }),
-        credentials: "include",
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         showError(errorData);
         return;
       }
-      const result = await response.json();
-      localStorage.setItem("user", JSON.stringify(result));
+      persistAuthSession(await response.json());
       router.push("/dashboard");
       router.refresh();
     } catch {

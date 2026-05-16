@@ -13,6 +13,11 @@ import {
 } from "@mui/material";
 import { Shield, LogIn, Globe } from "lucide-react";
 import { API_URL } from "../../../../config/api";
+import { apiFetch } from "../../../../lib/api-fetch";
+import {
+  clearAuthSession,
+  persistAuthSession,
+} from "../../../../lib/auth-token";
 import { useSnackbar } from "notistack";
 
 export default function AdminLoginPage() {
@@ -62,11 +67,10 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await apiFetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ login: formData.email, password: formData.password }),
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -75,20 +79,18 @@ export default function AdminLoginPage() {
         return;
       }
 
-      const user = await response.json();
+      const data = await response.json();
+      const user = data.user ?? data;
 
       if (user.globalRole !== "ADMIN") {
-        // Logout if not admin
-        await fetch(`${API_URL}/auth/logout`, {
-          method: "POST",
-          credentials: "include",
-        });
+        await apiFetch(`${API_URL}/auth/logout`, { method: "POST" });
+        clearAuthSession();
         enqueueSnackbar("Admin access required", { variant: "error" });
         setLoading(false);
         return;
       }
 
-      localStorage.setItem("user", JSON.stringify(user));
+      persistAuthSession(data);
       router.push(`/${locale}/admin/dashboard`);
     } catch (error) {
       console.error(error);
