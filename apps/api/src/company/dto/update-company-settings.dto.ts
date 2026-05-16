@@ -1,4 +1,4 @@
-import { RevenueFrequency, TaxGroup } from '@prisma/client';
+import { RevenueFrequency, TaxGroup } from '@repo/database';
 import { IsEnum, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateCompanySettingsDto {

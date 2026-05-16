@@ -107,7 +107,11 @@ export class CompanyController {
   @Post('tax/calculate')
   async calculateTax(@Req() req: any, @Body() dto: CalculateTaxDto) {
     const companyId = req.user?.companyId;
+    const role = req.user?.role;
     if (!companyId) throw new ForbiddenException('No company');
+    if (role !== 'OWNER' && role !== 'ADMIN') {
+      throw new ForbiddenException('Only OWNER or ADMIN can calculate taxes');
+    }
     return this.companyService.calculateTax(companyId, dto);
   }
 
@@ -115,7 +119,11 @@ export class CompanyController {
   @Post('tax/pay')
   async payTax(@Req() req: any, @Body() dto: PayTaxDto) {
     const companyId = req.user?.companyId;
+    const role = req.user?.role;
     if (!companyId) throw new ForbiddenException('No company');
+    if (role !== 'OWNER' && role !== 'ADMIN') {
+      throw new ForbiddenException('Only OWNER or ADMIN can pay taxes');
+    }
     return this.companyService.payTax(companyId, {
       amount: dto.amount,
       periodLabel: dto.periodLabel,
@@ -123,21 +131,45 @@ export class CompanyController {
     });
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Req() req: any, @Param('id') id: string) {
+    const userCompanyId = req.user?.companyId;
+    if (id !== userCompanyId) {
+      throw new ForbiddenException('Cannot access other company data');
+    }
     return this.companyService.findOne(id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id/settings')
   async updateSettings(
+    @Req() req: any,
     @Param('id') id: string,
     @Body() dto: UpdateCompanySettingsDto,
   ) {
+    const companyId = req.user?.companyId;
+    const role = req.user?.role;
+    if (id !== companyId) {
+      throw new ForbiddenException('Cannot modify other company settings');
+    }
+    if (role !== 'OWNER' && role !== 'ADMIN') {
+      throw new ForbiddenException('Only OWNER or ADMIN can update settings');
+    }
     return this.companyService.updateSettings(id, dto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post(':id/regenerate-code')
-  async regenerateCode(@Param('id') id: string) {
+  async regenerateCode(@Req() req: any, @Param('id') id: string) {
+    const companyId = req.user?.companyId;
+    const role = req.user?.role;
+    if (id !== companyId) {
+      throw new ForbiddenException('Cannot regenerate code for other company');
+    }
+    if (role !== 'OWNER' && role !== 'ADMIN') {
+      throw new ForbiddenException('Only OWNER or ADMIN can regenerate invite code');
+    }
     return this.companyService.regenerateInviteCode(id);
   }
 }

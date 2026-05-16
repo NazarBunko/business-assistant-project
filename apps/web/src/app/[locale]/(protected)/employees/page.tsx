@@ -368,37 +368,38 @@ export default function EmployeesPage() {
   const columnsCount = canEdit ? 8 : 5;
 
   return (
-    <div className="max-w-7xl mx-auto p-6! space-y-6!">
-      <Typography variant="h4" className="font-bold text-gray-800" sx={{ marginBottom: 3 }}>
+    <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6! space-y-4 sm:space-y-5 md:space-y-6!">
+      <Typography className="font-bold text-gray-800 text-2xl sm:text-3xl md:text-4xl" sx={{ marginBottom: { xs: 2, sm: 2.5, md: 3 } }}>
         {t("title")}
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ marginBottom: 4 }}>
+      <Typography color="text.secondary" sx={{ marginBottom: { xs: 3, sm: 3.5, md: 4 } }} className="text-sm sm:text-base">
         {t("subtitle")}
       </Typography>
 
       {salarySummary != null && salarySummary > 0 && (
-        <Paper className="rounded-xl p-4 mb-4 bg-gray-50 border">
-          <Typography variant="subtitle1" color="text.secondary">
+        <Paper className="rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 bg-gray-50 border">
+          <Typography color="text.secondary" className="text-xs sm:text-sm md:text-base">
             {t("summaryTitle")}
           </Typography>
-          <Typography variant="h6" className="font-bold">
+          <Typography className="font-bold text-lg sm:text-xl md:text-2xl">
             {salarySummary} ₴
           </Typography>
         </Paper>
       )}
 
-      <Paper className="rounded-2xl overflow-hidden">
-        <div className="p-6">
+      <Paper className="rounded-xl sm:rounded-2xl overflow-hidden">
+        <div className="p-3 sm:p-4 md:p-6">
           {!loading && list.length > 0 && (
-            <Box className="flex flex-wrap items-center gap-4 mb-4">
-              <FormControl size="small" className="min-w-[180px]">
-                <InputLabel>{t("sortBy")}</InputLabel>
+            <Box className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+              <FormControl size="small" className="w-full sm:w-auto sm:min-w-[180px]">
+                <InputLabel className="text-sm">{t("sortBy")}</InputLabel>
                 <Select
                   value={sortBy}
                   label={t("sortBy")}
                   onChange={(e) =>
                     setSortBy(e.target.value as "name" | "salaryAsc" | "salaryDesc")
                   }
+                  className="text-sm"
                 >
                   <MenuItem value="name">{t("sortByName")}</MenuItem>
                   <MenuItem value="salaryAsc">{t("sortBySalaryAsc")}</MenuItem>
@@ -411,17 +412,17 @@ export default function EmployeesPage() {
                   onChange={(e) => setFilterAutoPayOnly(e.target.checked)}
                   size="small"
                 />
-                <Typography variant="body2">{t("filterAutoPayOnly")}</Typography>
+                <Typography className="text-xs sm:text-sm">{t("filterAutoPayOnly")}</Typography>
               </div>
             </Box>
           )}
           {loading ? (
-            <div className="flex justify-center items-center py-12">
+            <div className="flex justify-center items-center py-8 sm:py-12">
               <CircularProgress />
             </div>
           ) : (
-            <TableContainer component={Paper} elevation={0} className="border rounded-xl">
-              <Table>
+            <TableContainer component={Paper} elevation={0} className="border rounded-lg sm:rounded-xl overflow-x-auto">
+              <Table size="small" className="sm:table" sx={{ minWidth: { xs: 700, md: 'auto' } }}>
                 <TableHead className="bg-gray-100">
                   <TableRow>
                     <TableCell className="px-6 py-4">{t("fullName")}</TableCell>

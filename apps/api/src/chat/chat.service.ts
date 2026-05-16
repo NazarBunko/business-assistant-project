@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { PrismaService } from '../prisma/prisma.service';
+import { DatabaseService } from '../database/database.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class ChatService implements OnModuleInit {
   private initializationPromise: Promise<void>;
 
   constructor(
-    private prisma: PrismaService,
+    private readonly db: DatabaseService,
     private config: ConfigService,
   ) {
     this.apiKey = this.config.get<string>('GEMINI_API_KEY');
@@ -110,60 +110,69 @@ export class ChatService implements OnModuleInit {
   }
 
   async getUserChats(userId: string) {
-    return this.prisma.chat.findMany({
-      where: { userId },
-      orderBy: { updatedAt: 'desc' },
-      include: {
-        messages: {
-          orderBy: { createdAt: 'asc' },
-          take: 1,
-        },
-      },
-    });
+    const chats = await this.db.query(
+      `SELECT * FROM "Chat" WHERE "userId" = $1 ORDER BY "updatedAt" DESC`,
+      [userId],
+    );
+
+    return Promise.all(
+      chats.map(async (chat) => {
+        const messages = await this.db.query(
+          `SELECT * FROM "Message" WHERE "chatId" = $1 ORDER BY "createdAt" ASC LIMIT 1`,
+          [chat.id],
+        );
+        return { ...chat, messages };
+      }),
+    );
   }
 
   async getChatMessages(chatId: string, userId: string) {
-    const chat = await this.prisma.chat.findUnique({
-      where: { id: chatId },
-    });
+    const chat = await this.db.queryOne<{ userId: string }>(
+      `SELECT "userId" FROM "Chat" WHERE id = $1`,
+      [chatId],
+    );
 
     if (!chat || chat.userId !== userId) {
       throw new Error('Chat not found or access denied');
     }
 
-    return this.prisma.message.findMany({
-      where: { chatId },
-      orderBy: { createdAt: 'asc' },
-    });
+    return this.db.query(
+      `SELECT * FROM "Message" WHERE "chatId" = $1 ORDER BY "createdAt" ASC`,
+      [chatId],
+    );
   }
 
   async updateChatTitle(chatId: string, userId: string, title: string) {
-    const chat = await this.prisma.chat.findUnique({
-      where: { id: chatId },
-    });
+    const chat = await this.db.queryOne<{ userId: string }>(
+      `SELECT "userId" FROM "Chat" WHERE id = $1`,
+      [chatId],
+    );
 
     if (!chat || chat.userId !== userId) {
       throw new Error('Chat not found or access denied');
     }
 
-    return this.prisma.chat.update({
-      where: { id: chatId },
-      data: { title },
-    });
+    const rows = await this.db.query(
+      `UPDATE "Chat" SET title = $1 WHERE id = $2 RETURNING *`,
+      [title, chatId],
+    );
+    return rows[0];
   }
 
   async deleteChat(chatId: string, userId: string) {
-    const chat = await this.prisma.chat.findUnique({
-      where: { id: chatId },
-    });
+    const chat = await this.db.queryOne<{ userId: string }>(
+      `SELECT "userId" FROM "Chat" WHERE id = $1`,
+      [chatId],
+    );
 
     if (!chat || chat.userId !== userId) {
       throw new Error('Chat not found or access denied');
     }
 
-    return this.prisma.chat.delete({
-      where: { id: chatId },
-    });
+    const rows = await this.db.query(`DELETE FROM "Chat" WHERE id = $1 RETURNING *`, [
+      chatId,
+    ]);
+    return rows[0];
   }
 
   async sendMessage(userId: string, content: string, chatId?: string) {
@@ -172,33 +181,30 @@ export class ChatService implements OnModuleInit {
 
     if (!currentChatId) {
       isNewChat = true;
-      const newChat = await this.prisma.chat.create({
-        data: {
-          userId,
-          title: 'New Chat',
-        },
-      });
-      currentChatId = newChat.id;
+      const newChatId = this.db.newId();
+      const rows = await this.db.query(
+        `INSERT INTO "Chat" (id, title, "userId") VALUES ($1, $2, $3) RETURNING *`,
+        [newChatId, 'New Chat', userId],
+      );
+      currentChatId = rows[0].id;
     }
 
-    await this.prisma.chat.update({
-      where: { id: currentChatId },
-      data: { updatedAt: new Date() },
-    });
+    await this.db.query(
+      `UPDATE "Chat" SET "updatedAt" = CURRENT_TIMESTAMP WHERE id = $1`,
+      [currentChatId],
+    );
 
-    await this.prisma.message.create({
-      data: {
-        content,
-        role: 'user',
-        chatId: currentChatId,
-      },
-    });
+    const userMessageId = this.db.newId();
+    await this.db.query(
+      `INSERT INTO "Message" (id, content, role, "chatId") VALUES ($1, $2, 'user', $3)`,
+      [userMessageId, content, currentChatId],
+    );
 
-    const prevMessages = await this.prisma.message.findMany({
-      where: { chatId: currentChatId },
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-    });
+    const prevMessages = await this.db.query<{ content: string; role: string }>(
+      `SELECT content, role FROM "Message"
+       WHERE "chatId" = $1 ORDER BY "createdAt" DESC LIMIT 10`,
+      [currentChatId],
+    );
 
     const history = prevMessages.reverse().map((msg) => ({
       role: msg.role === 'user' ? 'user' : 'model',
@@ -214,6 +220,12 @@ export class ChatService implements OnModuleInit {
       2. Team Management: Offer advice on leadership, conflict resolution, hiring, and employee motivation.
       3. Marketing & Strategy: Generate creative ideas for marketing campaigns, content strategies, and business development.
       4. Operational Efficiency: Suggest ways to optimize daily workflows and processes.
+      5. Application Support: Help users understand and use features of this business management application (transactions, employees, invoices, reports, etc.).
+
+      STRICT TOPIC BOUNDARIES:
+      - You may ONLY discuss topics related to: business, finance, accounting, management, HR, marketing, strategy, operations, entrepreneurship, taxes, sales, productivity, and this application's features.
+      - You MUST REFUSE to discuss: personal life, entertainment, politics, sports, health/medical advice, relationships, hobbies, pop culture, or any other non-business topics.
+      - If a user asks about unrelated topics, politely redirect them: "I'm a business assistant focused on helping with business, finance, and management topics. How can I help you with your business today?"
 
       Communication & Language Protocol:
       - Language Mirroring (CRITICAL): You must strictly answer in the same language the user uses.
@@ -225,6 +237,7 @@ export class ChatService implements OnModuleInit {
       Constraints:
       - If you don't have specific data about the user's company, do not invent numbers.
       - Be polite but direct. Focus on value and solutions.
+      - Stay strictly within business and application-related topics.
     `;
 
     if (this.initializationPromise) {
@@ -249,13 +262,11 @@ export class ChatService implements OnModuleInit {
       const result = await chatSession.sendMessage(content);
       const responseText = result.response.text();
 
-      await this.prisma.message.create({
-        data: {
-          content: responseText,
-          role: 'model',
-          chatId: currentChatId,
-        },
-      });
+      const modelMessageId = this.db.newId();
+      await this.db.query(
+        `INSERT INTO "Message" (id, content, role, "chatId") VALUES ($1, $2, 'model', $3)`,
+        [modelMessageId, responseText, currentChatId],
+      );
 
       let newTitle = null;
       if (isNewChat) {
@@ -264,11 +275,13 @@ export class ChatService implements OnModuleInit {
           const titleResult = await this.model.generateContent(titlePrompt);
           newTitle = titleResult.response.text().trim();
 
-          await this.prisma.chat.update({
-            where: { id: currentChatId },
-            data: { title: newTitle },
-          });
-        } catch (e) {}
+          await this.db.query(`UPDATE "Chat" SET title = $1 WHERE id = $2`, [
+            newTitle,
+            currentChatId,
+          ]);
+        } catch (e) {
+          /* ignore title generation errors */
+        }
       }
 
       return {

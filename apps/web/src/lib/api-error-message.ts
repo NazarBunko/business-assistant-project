@@ -15,10 +15,38 @@ export const API_ERROR_KEYS: Record<string, string> = {
     "table.cannotDeleteSalary",
 };
 
+/** Витягує текст помилки з відповіді NestJS (message може бути string | string[]). */
+export function parseApiErrorPayload(
+  payload: unknown,
+  fallback: string,
+): string {
+  if (!payload || typeof payload !== "object") {
+    return fallback;
+  }
+  const raw = (payload as { message?: unknown }).message;
+  if (Array.isArray(raw)) {
+    const joined = raw.filter((m) => typeof m === "string").join(". ");
+    return joined || fallback;
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return raw;
+  }
+  return fallback;
+}
+
 export function getApiErrorMessage(
   message: string,
-  t: (key: string) => string
+  t: (key: string) => string,
 ): string {
   const key = API_ERROR_KEYS[message];
   return key ? t(key) : message;
+}
+
+export function resolveApiError(
+  payload: unknown,
+  fallback: string,
+  t: (key: string) => string,
+): string {
+  const raw = parseApiErrorPayload(payload, fallback);
+  return getApiErrorMessage(raw, t);
 }

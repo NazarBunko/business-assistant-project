@@ -1,25 +1,23 @@
-import { Controller, Get, Patch, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Body, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
+@UseGuards(AuthGuard('jwt'))
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('profile')
-  async getProfile(@Query('userId') userId: string) {
-    const user = await this.userService.findOne(userId);
-    const { password, ...result } = user;
-    return result;
+  async getProfile(@Req() req: any) {
+    return this.userService.findOne(req.user.id);
   }
 
   @Patch('profile')
   async updateProfile(
-    @Query('userId') userId: string,
+    @Req() req: any,
     @Body() dto: UpdateUserDto,
   ) {
-    const user = await this.userService.updateProfile(userId, dto);
-    const { password, ...result } = user;
-    return result;
+    return this.userService.updateProfile(req.user.id, dto);
   }
 }

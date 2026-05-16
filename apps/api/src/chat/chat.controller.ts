@@ -3,50 +3,60 @@ import {
   Post,
   Get,
   Body,
-  Query,
   Param,
   Patch,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('chat')
+@UseGuards(AuthGuard('jwt'))
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Get('conversations')
-  async getUserChats(@Query('userId') userId: string) {
+  async getUserChats(@Req() req: any) {
+    const userId = req.user.id;
     return this.chatService.getUserChats(userId);
   }
 
   @Get(':id/messages')
   async getChatMessages(
     @Param('id') chatId: string,
-    @Query('userId') userId: string,
+    @Req() req: any,
   ) {
+    const userId = req.user.id;
     return this.chatService.getChatMessages(chatId, userId);
   }
 
   @Post()
   async chat(
-    @Body() body: { userId: string; content: string; chatId?: string },
+    @Req() req: any,
+    @Body() body: { content: string; chatId?: string },
   ) {
-    return this.chatService.sendMessage(body.userId, body.content, body.chatId);
+    const userId = req.user.id;
+    return this.chatService.sendMessage(userId, body.content, body.chatId);
   }
 
   @Patch(':id')
   async updateChatTitle(
     @Param('id') chatId: string,
-    @Body() body: { userId: string; title: string },
+    @Req() req: any,
+    @Body() body: { title: string },
   ) {
-    return this.chatService.updateChatTitle(chatId, body.userId, body.title);
+    const userId = req.user.id;
+    return this.chatService.updateChatTitle(chatId, userId, body.title);
   }
 
   @Delete(':id')
   async deleteChat(
     @Param('id') chatId: string,
-    @Query('userId') userId: string,
+    @Req() req: any,
   ) {
+    const userId = req.user.id;
     return this.chatService.deleteChat(chatId, userId);
   }
 }

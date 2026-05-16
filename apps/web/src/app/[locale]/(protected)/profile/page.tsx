@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useSnackbar } from "notistack";
 import {
   Paper,
   Typography,
@@ -12,6 +13,10 @@ import {
   CircularProgress,
   Alert,
   Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import {
@@ -22,6 +27,8 @@ import {
   Phone,
   Mail,
   Briefcase,
+  MessageCircle,
+  Send,
 } from "lucide-react";
 import { API_URL } from "../../../../config/api";
 
@@ -39,6 +46,7 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const t = useTranslations("Profile");
+  const { enqueueSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -59,6 +67,10 @@ export default function ProfilePage() {
     companyName: "",
   });
 
+  const [supportDialogOpen, setSupportDialogOpen] = useState(false);
+  const [supportMessage, setSupportMessage] = useState("");
+  const [sendingSupport, setSendingSupport] = useState(false);
+
   const getUserId = () => {
     if (typeof window !== "undefined") {
       const userStr = localStorage.getItem("user");
@@ -77,10 +89,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
-      const userId = getUserId();
       try {
         const res = await fetch(
-          `${API_URL}/user/profile?userId=${userId}`
+          `${API_URL}/user/profile`,
+          {
+            credentials: "include",
+          }
         );
         if (res.ok) {
           const data: UserProfile = await res.json();
@@ -114,18 +128,18 @@ export default function ProfilePage() {
     e.preventDefault();
     setIsSaving(true);
     setSuccessMessage("");
-    const userId = getUserId();
 
     const payload: any = { ...formData };
     if (!payload.password) delete payload.password;
 
     try {
       const res = await fetch(
-        `${API_URL}/user/profile?userId=${userId}`,
+        `${API_URL}/user/profile`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+          credentials: "include",
         }
       );
 
@@ -145,6 +159,37 @@ export default function ProfilePage() {
       console.error(e);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSendSupport = async () => {
+    if (!supportMessage.trim()) {
+      enqueueSnackbar(t("supportMessageRequired") || "Message is required", { variant: "warning" });
+      return;
+    }
+
+    setSendingSupport(true);
+    try {
+      const res = await fetch(`${API_URL}/support/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ message: supportMessage }),
+      });
+
+      if (res.ok) {
+        enqueueSnackbar(t("supportSent") || "Support request sent successfully", { variant: "success" });
+        setSupportMessage("");
+        setSupportDialogOpen(false);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        enqueueSnackbar(errorData.message || t("supportError") || "Failed to send support request", { variant: "error" });
+      }
+    } catch (e) {
+      console.error(e);
+      enqueueSnackbar(t("supportError") || "Failed to send support request", { variant: "error" });
+    } finally {
+      setSendingSupport(false);
     }
   };
 
@@ -351,9 +396,110 @@ export default function ProfilePage() {
                 </div>
               </div>
             </Paper>
+
+            <Paper
+              className="p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 bg-white"
+              sx={{ mt: 2.5 }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  mb: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <MessageCircle size={22} /> {t("supportTitle")}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mb: 2,
+                  lineHeight: 1.7,
+                  display: "block",
+                }}
+              >
+                {t("supportDescription")}
+              </Typography>
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<MessageCircle size={20} />}
+                onClick={() => setSupportDialogOpen(true)}
+                className="border-2 border-black text-black hover:bg-gray-50 px-6 py-3 rounded-xl normal-case text-base shadow-none"
+              >
+                {t("supportButton")}
+              </Button>
+            </Paper>
           </Grid>
         </Grid>
       </form>
+
+      <Dialog
+        open={supportDialogOpen}
+        onClose={() => !sendingSupport && setSupportDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ className: "rounded-2xl" }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
+          {t("supportDialogTitle")}
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1, pb: 0 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2,
+              lineHeight: 1.7,
+              display: "block",
+            }}
+          >
+            {t("supportDialogDescription")}
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={6}
+            label={t("supportMessageLabel")}
+            value={supportMessage}
+            onChange={(e) => setSupportMessage(e.target.value)}
+            placeholder={t("supportMessagePlaceholder")}
+            variant="outlined"
+            className="bg-gray-50"
+            InputProps={{ className: "rounded-xl" }}
+            inputProps={{ maxLength: 2000 }}
+            helperText={`${supportMessage.length}/2000`}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 1.5, pt: 1.5, pb: 1.5 }}>
+          <Button
+            onClick={() => setSupportDialogOpen(false)}
+            disabled={sendingSupport}
+            className="normal-case"
+          >
+            {t("cancel") || "Cancel"}
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSendSupport}
+            disabled={sendingSupport || !supportMessage.trim()}
+            startIcon={
+              sendingSupport ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <Send size={18} />
+              )
+            }
+            className="bg-black hover:bg-gray-800 text-white normal-case shadow-none"
+          >
+            {sendingSupport ? (t("sending") || "Sending...") : (t("send") || "Send")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

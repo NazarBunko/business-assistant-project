@@ -3,18 +3,18 @@ import {
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@repo/database';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './dto/register.dto';
 import { RegisterEmployeeDto } from './dto/register-employee.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../prisma/prisma.service';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
+    private readonly db: DatabaseService,
     private jwtService: JwtService,
   ) {}
 
@@ -24,22 +24,22 @@ export class AuthService {
 
     while (!isUnique) {
       code = Math.floor(10000000 + Math.random() * 90000000).toString();
-      const existing = await this.prisma.company.findUnique({
-        where: { inviteCode: code },
-      });
+      const existing = await this.db.queryOne(
+        `SELECT id FROM "Company" WHERE "inviteCode" = $1`,
+        [code],
+      );
       if (!existing) {
         isUnique = true;
       }
     }
-    return code;
+    return code!;
   }
 
   async register(dto: RegisterDto) {
-    const existingUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ email: dto.email }, { phone: dto.phone }],
-      },
-    });
+    const existingUser = await this.db.queryOne(
+      `SELECT id FROM "User" WHERE email = $1 OR phone = $2`,
+      [dto.email, dto.phone],
+    );
 
     if (existingUser) {
       throw new ConflictException('User already exists');
@@ -47,37 +47,52 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const inviteCode = await this.generateUniqueInviteCode();
+    const companyId = this.db.newId();
+    const userId = this.db.newId();
 
-    const company = await this.prisma.company.create({
-      data: {
-        name: dto.companyName,
-        inviteCode: inviteCode,
-        users: {
-          create: {
-            email: dto.email,
-            phone: dto.phone,
-            fullName: dto.fullName,
-            password: hashedPassword,
-            role: UserRole.OWNER,
-            jobTitle: 'Власник',
-          },
-        },
-      },
-      include: {
-        users: true,
-      },
+    await this.db.transaction(async (client) => {
+      await client.query(
+        `INSERT INTO "Company" (id, name, "inviteCode") VALUES ($1, $2, $3)`,
+        [companyId, dto.companyName, inviteCode],
+      );
+      await client.query(
+        `INSERT INTO "User" (id, email, phone, password, "fullName", role, "jobTitle", "companyId")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          userId,
+          dto.email,
+          dto.phone,
+          hashedPassword,
+          dto.fullName,
+          UserRole.OWNER,
+          'Власник',
+          companyId,
+        ],
+      );
     });
 
-    const user = company.users[0];
-    return this.generateToken(user.id, user.email, user.role, company.id);
+    return this.generateToken(
+      userId,
+      dto.email,
+      'USER',
+      UserRole.OWNER,
+      companyId,
+    );
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ email: dto.login }, { phone: dto.login }],
-      },
-    });
+    const user = await this.db.queryOne<{
+      id: string;
+      email: string;
+      password: string;
+      globalRole: string;
+      role: string;
+      companyId: string | null;
+    }>(
+      `SELECT id, email, password, "globalRole", role, "companyId"
+       FROM "User" WHERE email = $1 OR phone = $1`,
+      [dto.login],
+    );
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -92,61 +107,70 @@ export class AuthService {
     return this.generateToken(
       user.id,
       user.email,
+      user.globalRole,
       user.role,
-      user.companyId ?? null,
+      user.companyId,
     );
   }
 
   async registerEmployee(dto: RegisterEmployeeDto) {
-    const existingUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ email: dto.email }, { phone: dto.phone }],
-      },
-    });
+    const existingUser = await this.db.queryOne(
+      `SELECT id FROM "User" WHERE email = $1 OR phone = $2`,
+      [dto.email, dto.phone],
+    );
     if (existingUser) {
       throw new ConflictException('User already exists');
     }
 
-    const company = await this.prisma.company.findUnique({
-      where: { inviteCode: dto.inviteCode },
-    });
+    const company = await this.db.queryOne<{ id: string }>(
+      `SELECT id FROM "Company" WHERE "inviteCode" = $1`,
+      [dto.inviteCode],
+    );
     if (!company) {
       throw new ConflictException('Invalid company code');
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const user = await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        phone: dto.phone,
-        fullName: dto.fullName,
-        password: hashedPassword,
-        role: UserRole.EMPLOYEE,
-        jobTitle: 'Працівник',
-        companyId: company.id,
-      },
-    });
+    const userId = this.db.newId();
+
+    await this.db.query(
+      `INSERT INTO "User" (id, email, phone, password, "fullName", role, "jobTitle", "companyId")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        userId,
+        dto.email,
+        dto.phone,
+        hashedPassword,
+        dto.fullName,
+        UserRole.EMPLOYEE,
+        'Працівник',
+        company.id,
+      ],
+    );
 
     return this.generateToken(
-      user.id,
-      user.email,
-      user.role,
-      user.companyId ?? null,
+      userId,
+      dto.email,
+      'USER',
+      UserRole.EMPLOYEE,
+      company.id,
     );
   }
 
   private generateToken(
     userId: string,
     email: string,
+    globalRole: string,
     role: string,
     companyId: string | null,
   ) {
-    const payload = { sub: userId, email, role, companyId };
+    const payload = { sub: userId, email, globalRole, role, companyId };
     return {
       accessToken: this.jwtService.sign(payload),
       user: {
         id: userId,
         email,
+        globalRole,
         role,
         companyId,
       },

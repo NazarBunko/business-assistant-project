@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es2019",
+    "target": "ES2019",
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "types": ["node"],
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "skipLibCheck": true
   },
-  "include": ["."]
+  "include": ["src/**/*.ts"]
 }

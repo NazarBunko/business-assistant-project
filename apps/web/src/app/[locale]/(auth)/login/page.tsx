@@ -16,7 +16,7 @@ import {
 import { Link, useRouter } from "../../../../i18n/routing";
 import { ArrowLeft } from "lucide-react";
 import { API_URL } from "../../../../config/api";
-import { getApiErrorMessage } from "../../../../lib/api-error-message";
+import { resolveApiError } from "../../../../lib/api-error-message";
 
 interface LoginFormData {
   login: string;
@@ -48,10 +48,10 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => null);
         enqueueSnackbar(
-          getApiErrorMessage(errorData.message || t("errors.defaultError"), tRaw),
-          { variant: "error" }
+          resolveApiError(errorData, t("errors.defaultError"), tRaw),
+          { variant: "error" },
         );
         return;
       }
@@ -71,29 +71,29 @@ export default function LoginPage() {
   return (
     <Container
       maxWidth="sm"
-      className="min-h-screen flex flex-col items-center justify-center py-10"
-      sx={{ marginTop: -6 }}
+      className="min-h-screen flex flex-col items-center justify-center py-6 sm:py-10 px-4"
+      sx={{ marginTop: { xs: -2, sm: -4, md: -6 } }}
     >
-      <Box className="w-full mb-6 flex justify-start">
+      <Box className="w-full mb-4 sm:mb-6 flex justify-start">
         <Button
           component={Link}
           href="/"
-          startIcon={<ArrowLeft size={20} />}
+          startIcon={<ArrowLeft size={18} className="sm:w-5 sm:h-5" />}
           color="inherit"
-          className="normal-case hover:bg-transparent hover:text-primary px-0"
+          className="normal-case hover:bg-transparent hover:text-primary px-0 text-sm sm:text-base"
         >
           {tCommon("backToHome")}
         </Button>
       </Box>
 
-      <Paper className="p-8 w-full">
-        <Typography variant="h5" className="mb-6 text-center font-bold">
+      <Paper className="p-5 sm:p-6 md:p-8 w-full rounded-2xl">
+        <Typography className="mb-5 sm:mb-6 text-center font-bold text-xl sm:text-2xl md:text-3xl">
           {t("title")}
         </Typography>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 mt-4"
+          className="flex flex-col gap-3.5 sm:gap-4 mt-3 sm:mt-4"
         >
           <TextField
             label={t("emailLabel")}
@@ -102,6 +102,8 @@ export default function LoginPage() {
             error={!!errors.login}
             helperText={errors.login?.message as string}
             disabled={isLoading}
+            size="medium"
+            InputProps={{ className: "text-sm sm:text-base" }}
           />
 
           <TextField
@@ -114,6 +116,8 @@ export default function LoginPage() {
             error={!!errors.password}
             helperText={errors.password?.message as string}
             disabled={isLoading}
+            size="medium"
+            InputProps={{ className: "text-sm sm:text-base" }}
           />
 
           <Button
@@ -121,11 +125,11 @@ export default function LoginPage() {
             variant="contained"
             size="large"
             fullWidth
-            className="mt-2 py-3"
+            className="mt-2 py-2.5 sm:py-3 text-sm sm:text-base"
             disabled={isLoading}
           >
             {isLoading ? (
-              <CircularProgress size={24} color="inherit" />
+              <CircularProgress size={22} className="sm:w-6 sm:h-6" color="inherit" />
             ) : (
               t("submitButton")
             )}
@@ -133,7 +137,7 @@ export default function LoginPage() {
         </form>
 
         <Box className="mt-4 text-center">
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" className="text-xs sm:text-sm">
             {t("noAccount")}{" "}
             <Link
               href="/register"

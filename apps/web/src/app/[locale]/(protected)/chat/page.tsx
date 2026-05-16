@@ -82,10 +82,12 @@ export default function ChatPage() {
   }, []);
 
   const loadChats = async () => {
-    const userId = getUserId();
     try {
       const res = await fetch(
-        `${API_URL}/chat/conversations?userId=${userId}`
+        `${API_URL}/chat/conversations`,
+        {
+          credentials: "include",
+        }
       );
       if (res.ok) {
         const data = await res.json();
@@ -103,11 +105,13 @@ export default function ChatPage() {
     }
 
     const loadMessages = async () => {
-      const userId = getUserId();
       setIsLoading(true);
       try {
         const res = await fetch(
-          `${API_URL}/chat/${activeChatId}/messages?userId=${userId}`
+          `${API_URL}/chat/${activeChatId}/messages`,
+          {
+            credentials: "include",
+          }
         );
         if (res.ok) {
           const data = await res.json();
@@ -133,7 +137,6 @@ export default function ChatPage() {
 
   const handleSend = async (text: string = input) => {
     if (!text.trim() || isLoading) return;
-    const userId = getUserId();
 
     const tempMsg: Message = {
       id: Date.now().toString(),
@@ -148,8 +151,8 @@ export default function ChatPage() {
       const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
-          userId,
           content: text,
           chatId: activeChatId,
         }),
@@ -219,13 +222,13 @@ export default function ChatPage() {
 
   const saveTitle = async () => {
     if (!editingChatId || !editTitle.trim()) return;
-    const userId = getUserId();
 
     try {
       await fetch(`${API_URL}/chat/${editingChatId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, title: editTitle }),
+        credentials: "include",
+        body: JSON.stringify({ title: editTitle }),
       });
 
       setChats((prev) =>
@@ -241,11 +244,13 @@ export default function ChatPage() {
   };
 
   const performDeleteChat = async (chatId: string) => {
-    const userId = getUserId();
     try {
       const res = await fetch(
-        `${API_URL}/chat/${chatId}?userId=${userId}`,
-        { method: "DELETE" }
+        `${API_URL}/chat/${chatId}`,
+        { 
+          method: "DELETE",
+          credentials: "include",
+        }
       );
       if (res.ok) {
         setChats((prev) => prev.filter((c) => c.id !== chatId));
@@ -263,15 +268,15 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-140px)] max-w-7xl mx-auto gap-4 p-4 items-start">
-      <Paper className="w-64 h-full flex-shrink-0 flex flex-col overflow-hidden rounded-2xl border border-gray-200 hidden md:flex">
-        <div className="p-3">
+    <div className="flex h-[calc(100vh-100px)] sm:h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] max-w-7xl mx-auto gap-2 sm:gap-3 md:gap-4 p-2 sm:p-3 md:p-4 items-start">
+      <Paper className="w-56 sm:w-60 md:w-64 h-full flex-shrink-0 flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-gray-200 hidden md:flex">
+        <div className="p-2 sm:p-3">
           <Button
             fullWidth
             variant="contained"
-            startIcon={<Plus size={18} />}
+            startIcon={<Plus size={16} className="sm:w-[18px] sm:h-[18px]" />}
             onClick={handleNewChat}
-            className="bg-black hover:bg-gray-800 text-white py-2 rounded-xl normal-case shadow-none"
+            className="bg-black hover:bg-gray-800 text-white py-1.5 sm:py-2 text-sm rounded-lg sm:rounded-xl normal-case shadow-none"
           >
             New Chat
           </Button>
@@ -386,20 +391,19 @@ export default function ChatPage() {
 
       <Paper
         elevation={0}
-        className="flex-1 h-full flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+        className="flex-1 h-full flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-gray-200 bg-white shadow-sm"
       >
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
           {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center opacity-75">
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
-                <Bot size={32} className="text-primary" />
+            <div className="h-full flex flex-col items-center justify-center opacity-75 px-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-blue-50 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4">
+                <Bot size={24} className="text-primary sm:w-7 sm:h-7 md:w-8 md:h-8" />
               </div>
-              <Typography variant="h6" className="font-bold text-gray-800">
+              <Typography className="font-bold text-gray-800 text-lg sm:text-xl md:text-2xl">
                 Business Assistant AI
               </Typography>
               <Typography
-                variant="body2"
-                className="text-gray-500 mt-2 text-center max-w-xs"
+                className="text-gray-500 mt-2 text-center max-w-xs text-xs sm:text-sm"
               >
                 {t("welcomeSubtitle")}
               </Typography>
@@ -409,20 +413,20 @@ export default function ChatPage() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex gap-3 sm:gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+                  className={`flex gap-2 sm:gap-3 md:gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
                 >
                   <Avatar
-                    className={`${msg.role === "user" ? "bg-black" : "bg-primary"} w-8 h-8 sm:w-10 sm:h-10 border-2 border-white shadow-sm`}
+                    className={`${msg.role === "user" ? "bg-black" : "bg-primary"} w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 border-2 border-white shadow-sm flex-shrink-0`}
                   >
                     {msg.role === "user" ? (
-                      <User size={18} />
+                      <User size={16} className="sm:w-[18px] sm:h-[18px]" />
                     ) : (
-                      <Bot size={18} />
+                      <Bot size={16} className="sm:w-[18px] sm:h-[18px]" />
                     )}
                   </Avatar>
                   <div
                     className={`
-                    p-3 sm:p-4 rounded-2xl text-sm sm:text-base leading-relaxed whitespace-pre-wrap max-w-[85%] shadow-sm
+                    p-2.5 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base leading-relaxed whitespace-pre-wrap max-w-[85%] sm:max-w-[80%] shadow-sm
                     ${msg.role === "user"
                         ? "bg-gray-100 text-gray-900 rounded-tr-sm"
                         : "bg-blue-50 text-gray-800 rounded-tl-sm border border-blue-100"
@@ -434,12 +438,12 @@ export default function ChatPage() {
                 </div>
               ))}
               {isLoading && (
-                <div className="flex gap-4">
-                  <Avatar className="bg-primary w-8 h-8">
-                    <Bot size={18} />
+                <div className="flex gap-2 sm:gap-3 md:gap-4">
+                  <Avatar className="bg-primary w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0">
+                    <Bot size={16} className="sm:w-[18px] sm:h-[18px]" />
                   </Avatar>
-                  <div className="bg-blue-50 p-4 rounded-2xl rounded-tl-sm border border-blue-100">
-                    <CircularProgress size={16} />
+                  <div className="bg-blue-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl rounded-tl-sm border border-blue-100">
+                    <CircularProgress size={14} className="sm:w-4 sm:h-4" />
                   </div>
                 </div>
               )}
@@ -448,38 +452,39 @@ export default function ChatPage() {
           )}
         </div>
 
-        <div className="p-4 bg-white border-t border-gray-100">
+        <div className="p-2 sm:p-3 md:p-4 bg-white border-t border-gray-100">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-end gap-2 bg-gray-50 p-2 rounded-[24px] border border-gray-200 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all shadow-sm">
+            <div className="flex items-end gap-1.5 sm:gap-2 bg-gray-50 p-1.5 sm:p-2 rounded-[20px] sm:rounded-[24px] border border-gray-200 focus-within:border-primary/50 focus-within:ring-2 sm:focus-within:ring-4 focus-within:ring-primary/10 transition-all shadow-sm">
               <InputBase
-                className="flex-1 pl-2! pr-4 py-2.5 max-h-32 overflow-y-auto text-base text-gray-800"
+                className="flex-1 pl-2! pr-2 sm:pr-4 py-2 sm:py-2.5 max-h-24 sm:max-h-32 overflow-y-auto text-sm sm:text-base text-gray-800"
                 placeholder={t("placeholder")}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
                 multiline
-                maxRows={4}
+                maxRows={3}
+                sx={{ '& textarea': { fontSize: { xs: '0.875rem', sm: '1rem' } } }}
               />
               <IconButton
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isLoading}
                 className={`
-                   mb-1 mr-1 bg-black text-white hover:bg-gray-800 transition-all flex-shrink-0 shadow-sm
+                   mb-0.5 sm:mb-1 mr-0.5 sm:mr-1 bg-black text-white hover:bg-gray-800 transition-all flex-shrink-0 shadow-sm
                    ${!input.trim() || isLoading ? "opacity-30 cursor-not-allowed" : "opacity-100 hover:scale-105 active:scale-95"}
                  `}
-                sx={{ width: 36, height: 36 }}
+                sx={{ width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 } }}
               >
                 {isLoading ? (
-                  <CircularProgress size={18} color="inherit" />
+                  <CircularProgress size={16} className="sm:w-[18px] sm:h-[18px]" color="inherit" />
                 ) : (
-                  <ArrowUp size={20} strokeWidth={2.5} />
+                  <ArrowUp size={18} className="sm:w-5 sm:h-5" strokeWidth={2.5} />
                 )}
               </IconButton>
             </div>
 
             <Typography
               variant="caption"
-              className="text-center block text-gray-400 mt-2! text-[10px] sm:text-xs font-medium"
+              className="text-center block text-gray-400 mt-1.5 sm:mt-2! text-[9px] sm:text-[10px] md:text-xs font-medium"
             >
               {t("checkImportantInformation")}
             </Typography>

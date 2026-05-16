@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "User" ADD COLUMN "monthlySalary" DOUBLE PRECISION,
-ADD COLUMN "includeInAutoPay" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN "lastSalaryPaidAt" TIMESTAMP(3);
