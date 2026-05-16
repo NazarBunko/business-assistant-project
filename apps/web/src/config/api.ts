@@ -1,4 +1,6 @@
-// API Configuration
-// Change this URL if you need to connect from another device
-// Example: export const API_URL = "http://192.168.1.100:3001";
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// Browser calls same-origin /api (Next.js proxy) so httpOnly cookies work.
+// Server-side proxy uses API_URL_INTERNAL (Render / local Nest).
+export const API_URL =
+  typeof window !== "undefined"
+    ? "/api"
+    : (process.env.API_URL_INTERNAL?.replace(/\/$/, "") ?? "http://localhost:3001");

@@ -1,31 +1,14 @@
-const TOKEN_KEY = "accessToken";
+export function persistAuthSession(data: { user?: unknown } | unknown): void {
+  const user =
+    data && typeof data === "object" && "user" in data
+      ? (data as { user: unknown }).user
+      : data;
 
-export function getAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setAccessToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearAccessToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
-}
-
-export function persistAuthSession(data: {
-  user?: unknown;
-  accessToken?: string;
-}): void {
-  if (data.user) {
-    localStorage.setItem("user", JSON.stringify(data.user));
-  }
-  if (data.accessToken) {
-    setAccessToken(data.accessToken);
+  if (user && typeof user === "object") {
+    localStorage.setItem("user", JSON.stringify(user));
   }
 }
 
 export function clearAuthSession(): void {
   localStorage.removeItem("user");
-  clearAccessToken();
 }

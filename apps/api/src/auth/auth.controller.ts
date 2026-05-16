@@ -60,7 +60,7 @@ export class AuthController {
     return {
       httpOnly: true,
       secure: isProduction,
-      sameSite: (isProduction ? 'none' : 'strict') as 'none' | 'strict',
+      sameSite: 'lax' as const,
       maxAge: 24 * 60 * 60 * 1000,
     };
   }
