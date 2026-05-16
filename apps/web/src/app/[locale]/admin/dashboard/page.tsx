@@ -252,8 +252,7 @@ export default function AdminDashboardPage() {
           <Divider className="my-4" />
 
           <List>
-            <ListItem
-              button
+            <ListItemButton
               onClick={() => {
                 toggleLanguage();
                 setDrawerOpen(false);
@@ -264,10 +263,9 @@ export default function AdminDashboardPage() {
                 <Globe size={20} />
               </ListItemIcon>
               <ListItemText primary={`Language: ${locale.toUpperCase()}`} />
-            </ListItem>
+            </ListItemButton>
 
-            <ListItem
-              button
+            <ListItemButton
               onClick={() => {
                 handleLogout();
                 setDrawerOpen(false);
@@ -278,7 +276,7 @@ export default function AdminDashboardPage() {
                 <LogOut size={20} />
               </ListItemIcon>
               <ListItemText primary="Logout" />
-            </ListItem>
+            </ListItemButton>
           </List>
         </div>
       </Drawer>
