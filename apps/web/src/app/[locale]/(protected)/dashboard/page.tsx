@@ -1624,7 +1624,7 @@ export default function DashboardPage() {
 
             <Box className="border-t pt-4! space-y-2!">
               <Grid container spacing={2}>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <TextField
                     fullWidth
                     size="small"
@@ -1638,7 +1638,7 @@ export default function DashboardPage() {
                     InputProps={{ className: "rounded-xl" }}
                   />
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <TextField
                     fullWidth
                     size="small"
