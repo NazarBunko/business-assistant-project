@@ -1553,7 +1553,7 @@ export default function DashboardPage() {
             {invoiceItems.map((item, index) => (
               <Box key={index} className="border rounded-xl p-3! bg-gray-50">
                 <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
                     <TextField
                       fullWidth
                       size="small"
@@ -1566,7 +1566,7 @@ export default function DashboardPage() {
                       InputProps={{ className: "rounded-xl" }}
                     />
                   </Grid>
-                  <Grid item xs={6} sm={3}>
+                  <Grid size={{ xs: 6, sm: 3 }}>
                     <TextField
                       fullWidth
                       size="small"
@@ -1580,7 +1580,7 @@ export default function DashboardPage() {
                       InputProps={{ className: "rounded-xl" }}
                     />
                   </Grid>
-                  <Grid item xs={6} sm={3}>
+                  <Grid size={{ xs: 6, sm: 3 }}>
                     <TextField
                       fullWidth
                       size="small"
@@ -1594,7 +1594,7 @@ export default function DashboardPage() {
                       InputProps={{ className: "rounded-xl" }}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={2}>
+                  <Grid size={{ xs: 12, sm: 2 }}>
                     <Box className="flex items-center justify-between">
                       <Typography variant="body2" className="font-semibold">
                         ${getInvoiceItemAmount(item).toFixed(2)}
