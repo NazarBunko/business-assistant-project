@@ -115,7 +115,7 @@
       "passwordLabel": "Password",
       "submitButton": "Log In",
       "noAccount": "Don't have an account?",
-      "registerLink": "Create Company",
+      "registerLink": "Register",
       "errors": {
         "required": "This field is required",
         "passwordRequired": "Enter password",

@@ -115,7 +115,7 @@
       "passwordLabel": "Пароль",
       "submitButton": "Увійти",
       "noAccount": "Немає акаунту?",
-      "registerLink": "Створити компанію",
+      "registerLink": "Зареєструватись",
       "errors": {
         "required": "Це поле обов'язкове",
         "passwordRequired": "Введіть пароль",
