@@ -567,18 +567,18 @@ export default function DashboardPage() {
               <tr>
                 <td>${item.description}</td>
                 <td>${item.quantity}</td>
-                <td>$${item.unitPrice.toFixed(2)}</td>
-                <td>$${item.amount.toFixed(2)}</td>
+                <td>${item.unitPrice.toFixed(2)} ₴</td>
+                <td>${item.amount.toFixed(2)} ₴</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
 
         <div class="totals">
-          <div>Subtotal: $${invoice.subtotal.toFixed(2)}</div>
-          ${invoice.taxAmount > 0 ? `<div>Tax (${invoice.taxRate}%): $${invoice.taxAmount.toFixed(2)}</div>` : ''}
-          ${invoice.discount > 0 ? `<div>Discount: -$${invoice.discount.toFixed(2)}</div>` : ''}
-          <div class="total">Total: $${invoice.total.toFixed(2)}</div>
+          <div>Subtotal: ${invoice.subtotal.toFixed(2)} ₴</div>
+          ${invoice.taxAmount > 0 ? `<div>Tax (${invoice.taxRate}%): ${invoice.taxAmount.toFixed(2)} ₴</div>` : ''}
+          ${invoice.discount > 0 ? `<div>Discount: -${invoice.discount.toFixed(2)} ₴</div>` : ''}
+          <div class="total">Total: ${invoice.total.toFixed(2)} ₴</div>
         </div>
 
         ${invoice.notes ? `<div style="margin-top: 30px;"><strong>Notes:</strong><br>${invoice.notes}</div>` : ''}
@@ -1140,7 +1140,7 @@ export default function DashboardPage() {
                       <DollarSign size={20} className="text-green-600 sm:w-6 sm:h-6" />
                     </Box>
                     <Typography className="font-bold text-gray-900 mb-1! text-base sm:text-lg md:text-xl">
-                      ${invoiceStats.totalRevenue.toFixed(2)}
+                      {invoiceStats.totalRevenue.toFixed(2)} ₴
                     </Typography>
                     <Typography className="text-gray-500 text-xs sm:text-sm">
                       {t("invoices.stats.totalRevenue")}
@@ -1153,7 +1153,7 @@ export default function DashboardPage() {
                       <Clock size={20} className="text-orange-600 sm:w-6 sm:h-6" />
                     </Box>
                     <Typography className="font-bold text-gray-900 mb-1! text-base sm:text-lg md:text-xl">
-                      ${invoiceStats.pendingAmount.toFixed(2)}
+                      {invoiceStats.pendingAmount.toFixed(2)} ₴
                     </Typography>
                     <Typography className="text-gray-500 text-xs sm:text-sm">
                       {t("invoices.stats.pendingAmount")}
@@ -1262,7 +1262,7 @@ export default function DashboardPage() {
                           </TableCell>
                           <TableCell>{invoice.clientName}</TableCell>
                           <TableCell className="font-semibold">
-                            ${invoice.total.toFixed(2)}
+                            {invoice.total.toFixed(2)} ₴
                           </TableCell>
                           <TableCell>
                             <FormControl size="small" className="min-w-[120px]">
@@ -1597,7 +1597,7 @@ export default function DashboardPage() {
                   <Grid size={{ xs: 12, sm: 2 }}>
                     <Box className="flex items-center justify-between">
                       <Typography variant="body2" className="font-semibold">
-                        ${getInvoiceItemAmount(item).toFixed(2)}
+                        {getInvoiceItemAmount(item).toFixed(2)} ₴
                       </Typography>
                       {invoiceItems.length > 1 && (
                         <IconButton
@@ -1657,7 +1657,7 @@ export default function DashboardPage() {
               <Box className="flex justify-between items-center py-2!">
                 <Typography variant="body1">{t("invoices.form.subtotal")}:</Typography>
                 <Typography variant="body1" className="font-semibold">
-                  ${calculateInvoiceSubtotal().toFixed(2)}
+                  {calculateInvoiceSubtotal().toFixed(2)} ₴
                 </Typography>
               </Box>
               <Box className="flex justify-between items-center py-2! border-t">
@@ -1665,7 +1665,7 @@ export default function DashboardPage() {
                   {t("invoices.form.totalAmount")}:
                 </Typography>
                 <Typography variant="h6" className="font-bold">
-                  ${calculateInvoiceTotal().toFixed(2)}
+                  {calculateInvoiceTotal().toFixed(2)} ₴
                 </Typography>
               </Box>
             </Box>
@@ -1764,10 +1764,10 @@ export default function DashboardPage() {
                             <TableCell>{item.description}</TableCell>
                             <TableCell align="right">{item.quantity}</TableCell>
                             <TableCell align="right">
-                              ${item.unitPrice.toFixed(2)}
+                              {item.unitPrice.toFixed(2)} ₴
                             </TableCell>
                             <TableCell align="right" className="font-semibold">
-                              ${item.amount.toFixed(2)}
+                              {item.amount.toFixed(2)} ₴
                             </TableCell>
                           </TableRow>
                         ))}
@@ -1780,7 +1780,7 @@ export default function DashboardPage() {
                   <Box className="flex justify-between">
                     <Typography>{t("invoices.form.subtotal")}:</Typography>
                     <Typography className="font-semibold">
-                      ${selectedInvoice.subtotal.toFixed(2)}
+                      {selectedInvoice.subtotal.toFixed(2)} ₴
                     </Typography>
                   </Box>
                   {selectedInvoice.taxAmount > 0 && (
@@ -1789,7 +1789,7 @@ export default function DashboardPage() {
                         {t("invoices.form.taxRate")} ({selectedInvoice.taxRate}%):
                       </Typography>
                       <Typography className="font-semibold">
-                        ${selectedInvoice.taxAmount.toFixed(2)}
+                        {selectedInvoice.taxAmount.toFixed(2)} ₴
                       </Typography>
                     </Box>
                   )}
@@ -1797,7 +1797,7 @@ export default function DashboardPage() {
                     <Box className="flex justify-between">
                       <Typography>{t("invoices.form.discount")}:</Typography>
                       <Typography className="font-semibold text-red-600">
-                        -${selectedInvoice.discount.toFixed(2)}
+                        -{selectedInvoice.discount.toFixed(2)} ₴
                       </Typography>
                     </Box>
                   )}
@@ -1806,7 +1806,7 @@ export default function DashboardPage() {
                       {t("invoices.total")}:
                     </Typography>
                     <Typography variant="h6" className="font-bold">
-                      ${selectedInvoice.total.toFixed(2)}
+                      {selectedInvoice.total.toFixed(2)} ₴
                     </Typography>
                   </Box>
                 </Box>
